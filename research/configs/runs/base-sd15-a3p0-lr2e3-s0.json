@@ -1,0 +1,56 @@
+{
+ "run": {
+  "run_id": "base-sd15-a3p0-lr2e3-s0",
+  "arm": "base",
+  "seed": 0,
+  "task": {
+   "name": "agentic",
+   "L_max": 16384,
+   "tokenizer": "gpt2",
+   "max_rows": 16384
+  },
+  "steps": 10000,
+  "lr": 0.002,
+  "overrides": {
+   "d_model": 384,
+   "n_blocks": 12,
+   "heads": 6,
+   "mlp_hidden": 768,
+   "mixer": [
+    "gdn",
+    "gdn",
+    "gdn",
+    "attn",
+    "gdn",
+    "gdn",
+    "gdn",
+    "attn",
+    "gdn",
+    "gdn",
+    "gdn",
+    "attn"
+   ],
+   "rope": true,
+   "pos_emb": false,
+   "attn_conv": 4
+  },
+  "batch": 1,
+  "eval_every": 2000,
+  "eval_size": 32,
+  "warmup": 200,
+  "lr_schedule": "cosine",
+  "adam_beta2": 0.999
+ },
+ "post_eval": {
+  "n": 32,
+  "batch": 1,
+  "task": {
+   "name": "agentic",
+   "L_max": 16384,
+   "tokenizer": "gpt2",
+   "max_rows": 16384
+  },
+  "attn_stats": true,
+  "far": 512
+ }
+}

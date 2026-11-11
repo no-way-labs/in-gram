@@ -1,0 +1,41 @@
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 1, horizontal sep=1.9cm},
+  width=0.46\textwidth, height=5.4cm,
+  xlabel={Attention layers $A$}, xtick={0,1,2,4}, xmin=-0.3, xmax=4.3,
+  axis lines=left, axis line style={mute}, tick style={mute},
+  ymajorgrids, grid style={black!8},
+  tick label style={font=\footnotesize}, label style={font=\footnotesize},
+  title style={font=\footnotesize},
+  yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2, /pgf/number format/zerofill},
+  legend style={font=\footnotesize, draw=none, fill=white, fill opacity=0.8, text opacity=1},
+  legend cell align=left,
+]
+\nextgroupplot[title={(a) All cells}, ylabel={Loss (nats per token)}, ymin=0.5, ymax=1.08,
+  legend pos=north east]
+\addplot[mute, thick, mark=o, mark size=2pt] table[x=A, y=P0]{generated/grid.dat};
+\addlegendentry{$P=0$}
+\addplot[ramp1, thick, mark=square*, mark size=1.8pt] table[x=A, y=P1]{generated/grid.dat};
+\addlegendentry{$P=1$}
+\addplot[ramp2, thick, mark=triangle*, mark size=2.2pt] table[x=A, y=P2]{generated/grid.dat};
+\addlegendentry{$P=2$}
+\addplot[ramp3, thick, mark=diamond*, mark size=2.2pt] table[x=A, y=P4]{generated/grid.dat};
+\addlegendentry{$P=4$}
+\addplot[mute, only marks, mark=o, mark size=1pt, forget plot] table[x=A, y=P0s0]{generated/grid.dat};
+\addplot[mute, only marks, mark=o, mark size=1pt, forget plot] table[x=A, y=P0s1]{generated/grid.dat};
+
+\nextgroupplot[title={(b) Cells with \ingram{}, enlarged}, ymin=0.570, ymax=0.615,
+  ytick={0.57,0.58,0.59,0.60,0.61}, xmax=5.1, clip=false]
+\addplot[ramp1, thick, mark=square*, mark size=1.8pt] table[x=A, y=P1]{generated/grid.dat}
+  node[pos=1, right=3pt, font=\footnotesize, text=ink] {$P=1$};
+\addplot[ramp2, thick, mark=triangle*, mark size=2.2pt] table[x=A, y=P2]{generated/grid.dat}
+  node[pos=1, right=3pt, font=\footnotesize, text=ink] {$P=2$};
+\addplot[ramp3, thick, mark=diamond*, mark size=2.2pt] table[x=A, y=P4]{generated/grid.dat}
+  node[pos=1, right=3pt, font=\footnotesize, text=ink] {$P=4$};
+\foreach \c/\k in {ramp1/P1, ramp2/P2, ramp3/P4} {
+  \edef\tmp{\noexpand\addplot[\c, only marks, mark=o, mark size=1pt, forget plot] table[x=A, y=\k s0]{generated/grid.dat};
+            \noexpand\addplot[\c, only marks, mark=o, mark size=1pt, forget plot] table[x=A, y=\k s1]{generated/grid.dat};}
+  \tmp
+}
+\end{groupplot}
+\end{tikzpicture}

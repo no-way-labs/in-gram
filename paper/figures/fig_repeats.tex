@@ -1,0 +1,37 @@
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 1, horizontal sep=2.9cm},
+  height=5.4cm,
+  axis lines=left, axis line style={mute}, tick style={mute},
+  ymajorgrids, grid style={black!8},
+  tick label style={font=\footnotesize}, label style={font=\footnotesize},
+  title style={font=\footnotesize},
+  xmode=log, xmin=0.8, xmax=330,
+  xtick={1.024,4.096,16.384,65.536,262.144}, xticklabels={1k,4k,16k,64k,256k},
+  xlabel={Position in the session (tokens)},
+  ymin=0, ymax=100, ytick={0,25,50,75,100}, clip=false,
+]
+\nextgroupplot[title={(a) Preceding $N$-gram occurred earlier}, width=0.385\textwidth,
+  ylabel={Share of tokens (\%)}]
+\draw[black!25, densely dashed] (axis cs:16.384,0) -- (axis cs:16.384,100);
+\addplot[ramp1!55, thick, mark=*, mark size=1.3pt] table[x=ktok, y=s1]{generated/gram_ctx.dat};
+\addplot[ramp1, thick, mark=*, mark size=1.3pt] table[x=ktok, y=s2]{generated/gram_ctx.dat};
+\addplot[ramp1!50!ramp2, thick, mark=*, mark size=1.3pt] table[x=ktok, y=s4]{generated/gram_ctx.dat};
+\addplot[ramp2, thick, mark=*, mark size=1.3pt] table[x=ktok, y=s8]{generated/gram_ctx.dat};
+\addplot[ramp2!50!ramp3, thick, mark=*, mark size=1.3pt] table[x=ktok, y=s16]{generated/gram_ctx.dat};
+\addplot[ramp3, thick, mark=*, mark size=1.3pt] table[x=ktok, y=s32]{generated/gram_ctx.dat};
+\node[font=\scriptsize, anchor=west, text=ramp1!80!ramp2] at (axis cs:280,102) {$N=1$};
+\node[font=\scriptsize, anchor=west, text=ramp2] at (axis cs:280,90.5) {$N=8$};
+\node[font=\scriptsize, anchor=west, text=ramp3] at (axis cs:280,77.5) {$N=32$};
+
+\nextgroupplot[title={(b) Lookup accuracy and token kinds}, width=0.385\textwidth,
+  ylabel={Share of tokens (\%)}]
+\draw[black!25, densely dashed] (axis cs:16.384,0) -- (axis cs:16.384,100);
+\addplot[cat1, thick, mark=*, mark size=1.6pt] table[x=ktok, y=lookup]{generated/gram_ctx.dat};
+\addplot[cat3!85!black, thick, mark=triangle*, mark size=2pt] table[x=ktok, y=far]{generated/gram_ctx.dat};
+\addplot[cat2, thick, mark=square*, mark size=1.5pt] table[x=ktok, y=older]{generated/gram_ctx.dat};
+\node[font=\scriptsize, anchor=west, text=cat1!85!black] at (axis cs:280,91.6) {lookup right};
+\node[font=\scriptsize, anchor=west, text=cat3!65!black] at (axis cs:280,22) {far 8-gram match};
+\node[font=\scriptsize, anchor=west, text=cat2!85!black] at (axis cs:280,5.6) {older value};
+\end{groupplot}
+\end{tikzpicture}

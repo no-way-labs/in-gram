@@ -1,0 +1,8 @@
+RTX 4090 24 GB + 128 GB DDR5: max context [673852, 1347705, 2021558]; decode tok/s at 256k [25, 25, 25]; fits 256k [True, True, True]
+MacBook Pro, 128 GB (M4 Max-class): max context [434027, 743986, 1057619]; decode tok/s at 256k [142, 145, 146]; fits 256k [True, True, True]
+DGX Spark, 128 GB (GB10, 273 GB/s): max context [631313, 1095011, 1556621]; decode tok/s at 256k [71, 73, 73]; fits 256k [True, True, True]
+per token (bytes): KV + index [25344, 12672, 8448], In-gram slots [0, 1572, 1572]; In-gram static table 0.40 GB; at 1M tokens: KV + index [26.6, 13.3, 8.9] GB, In-gram slots [0.0, 1.6, 1.6] GB
+laptop, at the bound of 6 slots per token: max context [434027, 558931, 719146]
+24 attention layers (as released): 128k held 4.47 GB host 0.00 GB sessions 558 step 15.0 ms tok/s 37120; 1M held 32.75 GB host 0.00 GB sessions 76 step 12.3 ms tok/s 6196
+12 attention layers + \ingram{}: 128k held 2.53 GB host 0.41 GB sessions 988 step 18.2 ms tok/s 54177; 1M held 16.67 GB host 3.26 GB sessions 149 step 12.8 ms tok/s 11648
+6 attention layers + \ingram{}: 128k held 1.56 GB host 0.41 GB sessions 1605 step 22.8 ms tok/s 70291; 1M held 8.63 GB host 3.26 GB sessions 289 step 13.8 ms tok/s 20922

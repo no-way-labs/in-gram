@@ -1,0 +1,91 @@
+\section{Serving implications}
+\label{sec:serving}
+
+\ingram{} changes the state that a served model stores for each session, and where that state can
+reside. We first report measured counts and then present two scenarios from a roofline model. The
+scenarios assume a model with fewer attention layers; Section~\ref{sec:results} provides the
+evidence, at up to 115M parameters, that \ingram{} allows a hybrid to maintain its loss with fewer
+of them.
+
+\subsection{State per session}
+\label{sec:serving-kind}
+
+\begin{figure}[tb]
+\centering
+\input{figures/fig_state}
+\caption{(a) Slots that \ingram{} has written per token of context, for held-out trajectories read
+from their first token: 704 trajectories up to 16,384 tokens, 566 at 65,536 tokens and 134 at
+131,072 tokens. The bound is six. (b) State per session of our three models with 8 blocks of width
+256, in fp32, computed from these slot counts with the accounting of Table~\ref{tab:cost}. At
+131,072 tokens it is 537~MB for the 3:1 hybrid, 314~MB for the 7:1 hybrid with \ingram{} and
+46~MB for GDN with \ingram{}. The dashed line marks 16,384 tokens, the context at which the models were
+trained and evaluated.}
+\label{fig:state}
+\end{figure}
+
+A model with \ingram{} has two components beyond its other weights, a hashed table and a slot
+store. The hashed table is a parameter: all sessions share it, and each token reads one row per cue length. The slot store
+belongs to one session: it contains one vector for every cue the session has written, located
+through a hash index. Each generated token reads and writes one slot per cue length, regardless of
+the length of the context. An attention layer stores a key and a value for every earlier token,
+and each generated token scores all of them, or an index over them when the attention is sparse.
+The slot store therefore requires little memory bandwidth and can reside in ordinary system memory
+or on storage, whereas the attention cache requires fast memory. The schedule of writes and reads
+depends on token ids alone, and prefill therefore fills the slots in one pass over the prompt.
+
+The slot store grows with the context, because a session adds a slot each time it encounters a new
+cue, at most six per token. On held-out trajectories read from their first token, the measured
+rate is below this bound and decreases with depth (Figure~\ref{fig:state}a). A session has
+written 2.89 slots per token after 16,384 tokens, 1.96 after 65,536 tokens and 1.34 after 131,072
+tokens, and between 65,536 and 131,072 tokens a new token adds 0.67 slots. After 131,072 tokens
+the store therefore holds 1.34 vectors of width 64 per token of context, against a key and a value
+of width 256 in one attention layer, a factor of 6.0; after 16,384 tokens the factor is 2.8. With
+the state of the GDN blocks included, a session of 16,384 tokens occupies 12.7~MB for GDN with
+\ingram{}, 46.2~MB for the 7:1 hybrid with \ingram{} and 67.5~MB for the 3:1 hybrid in fp32
+(Appendix~\ref{sec:cost}), and a session of 131,072 tokens 46~MB, 314~MB and 537~MB
+(Figure~\ref{fig:state}b). Slot vectors and table rows quantize to 4 bits at a cost of at most
+0.0005 nats on seeds 0 and 1 (exploratory; Appendix~\ref{app:other}).
+
+\subsection{Two scenarios}
+\label{sec:serving-local}
+
+\begin{table}[tb]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+{\small (a) One user: largest context that fits in memory, in tokens}\\[3pt]
+\input{generated/tab_serving_local}\\[8pt]
+{\small (b) Shared replica: state per session and sessions per replica}\\[3pt]
+\input{generated/tab_serving_dc}
+\caption{Two scenarios from a roofline model. (a) A model shaped like Qwen3.8-Flash-Next (48
+layers, 12 of them sparse attention as released) serving one user: weights and N-gram tables at
+4.5 bits per parameter, attention cache in 16-bit floats, \ingram{} with slot width 512 in 16-bit
+floats, 1.5 slots per token and 24 bytes of index per slot. The model may use 110~GB of the
+laptop's memory and 115~GB of the mini PC's; the laptop has 546~GB/s of memory bandwidth and the
+mini PC 273~GB/s. On the first machine the cache and the weights outside the experts are in 22~GB
+of the GPU memory, and the experts, the tables and the slot store are in 120~GB of system memory.
+(b) A model shaped like Kimi K3.1 Pro (69 linear and 24 sparse-attention layers as released) on a
+replica of 32 accelerators with 141~GB of memory each, 90\% of it usable: weights of 1,561~GB as
+released (4.5 bits per parameter on average), attention cache in 16-bit floats, sessions limited by the accelerator memory left after
+the weights, removed attention layers become linear layers, and
+\ingram{} uses slot width 1,024 in 16-bit floats with 1.5 slots per token and 24 bytes of index
+per slot, stored in host memory.}
+\label{tab:serving}
+\end{table}
+
+For one user on one machine, memory determines how much context fits (Table~\ref{tab:serving}a).
+As released, the 12 attention layers of a model shaped like Qwen3.8-Flash-Next require 25.3~KB of
+cache and index per token of context. With six attention layers the cache requires 12.7~KB per
+token, and \ingram{} adds 1.6~KB per token and a table of 0.4~GB. On a laptop with 128~GB of
+unified memory, of which the model may use 110~GB and the weights and $N$-gram tables occupy
+99~GB, the largest context that fits increases from 434k tokens to 744k with six
+attention layers and to 1.06M with four. Both scenarios assume 1.5 slots per token, above the 1.34
+that we measure after 131,072 tokens.
+
+The same accounting applies to a replica that serves many sessions (Table~\ref{tab:serving}b). For
+a model shaped like Kimi K3.1 Pro, a session of 1M tokens occupies 32.7~GB on the accelerators,
+32.3~GB of it attention cache and index. With half of the attention layers a session occupies
+16.7~GB there and 3.3~GB of \ingram{} slots in host memory, and a replica accommodates 149
+sessions instead of 76, or 289 with a quarter of the attention layers. A decode step
+takes 12 to 14~ms in all three configurations at this context, because reading the weights
+dominates it, and tokens per second therefore scale with the number of sessions.

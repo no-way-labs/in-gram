@@ -1,0 +1,182 @@
+\section{Results}
+\label{sec:results}
+
+\subsection{Repeats in agentic sessions and the n-gram cache}
+\label{sec:repeats}
+
+\begin{figure}[tb]
+\centering
+\input{figures/fig_repeats}
+\caption{Repeat statistics of the 704 held-out trajectories, read from their first token, by
+position in the session. (a) Share of tokens whose preceding $N$-gram occurred earlier in the
+session, for the six cue lengths of \ingram{}. (b) Share of tokens that the longest-match lookup
+of Section~\ref{sec:repeats} predicts, share whose preceding 8-gram occurred earlier with its most
+recent occurrence more than 512 tokens back, and share for which an older continuation of a 4-token
+cue is right and the most recent one is wrong. Each point pools one range of positions (up to 1k,
+1k to 2k, 2k to 4k, and so on); 566 trajectories reach 64k tokens and 134 reach 128k. The dashed
+line marks 16,384 tokens, the context of our models. These are counts on token ids and involve no
+model.}
+\label{fig:repeats}
+\end{figure}
+
+In the 32 evaluation windows, the $N$-gram that precedes a token has already occurred in the same
+window for 94.6\% of tokens at $N = 1$, 77.0\% at $N = 4$ and 65.5\% at $N = 8$. A lookup with no
+parameters, which finds the longest earlier match ($N = 8$ down to $1$) and copies the token that
+followed its most recent occurrence, predicts 78.8\% of next tokens. These windows are cut from
+longer sessions: the held-out trajectories have a median of 96k tokens, and repeats become more
+frequent and longer with depth (Figure~\ref{fig:repeats}). The preceding 8-gram has occurred
+earlier for 53.2\% of tokens at positions 8k to 16k and for 90.2\% beyond 128k, and the lookup
+predicts 73.5\% and 91.6\% of tokens at these depths. The contexts of 16,384 tokens that we train
+and evaluate on therefore contain fewer of the repeats that \ingram{} reads than a full session
+does.
+
+Because a lookup predicts this share of tokens, we include a baseline that operates at inference
+time, the n-gram cache. At each position it finds the longest $N \le 8$ whose $N$-gram occurred
+earlier and predicts from the counts of its earlier continuations. We mix it with a model using
+one weight per matched $N$, fit the weights on 16 windows and score the other 16, in both
+directions. On seeds 0 and 1 the cache lowers the loss of GDN from 1.002 to 0.683 and the loss of
+the 3:1 hybrid from 0.722 to 0.621. We therefore report each $\Delta$ twice: between the two
+models, and between the two models with the cache mixed into both.
+
+\subsection{Replacing the attention layers of a 3:1 hybrid}
+\label{sec:replace}
+
+\begin{figure}[tb]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/fig_confirm}}
+\caption{The pre-registered comparisons. Each bold heading names our model, and each row below it
+compares that model with one reference model that has no \ingram{}. The horizontal axis is the
+loss of our model minus the loss of the reference; left of zero, our model has the lower loss.
+Large markers are means over
+seeds 20--27 ($n = 8$; $n = 4$ in the fifth row) with 95\% bootstrap intervals, small dots are
+single seeds, and open squares repeat the comparison with the n-gram cache interpolated into both
+models. The columns at the right give the two means. The line under each heading gives the
+blocks $\times$ width, parameters and training tokens of our model, and a row states where either
+model differs; parentheses after a reference give its parameters. Both models of a row train for
+the same number of steps, except in the seventh row, where the hybrid trains twice as long. Losses
+and tests are in Table~\ref{tab:confirm}.}
+\label{fig:confirm}
+\end{figure}
+
+Figure~\ref{fig:confirm} shows every pre-registered comparison, and Table~\ref{tab:confirm} in the
+appendix gives the losses and tests in the same order. At equal training steps, a GDN with
+\ingram{} and no attention reaches a lower loss than each 3:1 hybrid we trained. Against the 3:1
+hybrid of the same depth and width (30.4M parameters), the loss is 0.607 against 0.749, and
+$\Delta = -0.142$ nats (95\% CI $[-0.166, -0.127]$; 8 of 8 seeds; Holm $p = 0.012$). One hybrid
+run is an outlier (seed 20, loss 0.835); the median difference is $-0.134$.
+
+The model with \ingram{} has 56.0M parameters, of which 25.2M are rows of the hashed table; the
+30.4M hybrid is therefore the smaller model. The second and third rows of
+Figure~\ref{fig:confirm} are controls for that difference. A 3:1 hybrid with 12 blocks of width
+384 has 54.2M parameters and reaches 0.709, and $\Delta = -0.102$ ($[-0.113, -0.092]$; 8 of 8;
+Holm $p = 0.008$). A 3:1 hybrid that includes the same hashed table with its writes disabled, a
+static $N$-gram table, has 55.8M parameters (0.1M of them are write projections that it does not
+use) and reaches 0.745, against 0.749 for the hybrid
+without the table, and $\Delta = -0.137$ ($[-0.179, -0.104]$; 8 of 8; Holm $p = 0.016$). Table
+parameters without the writes therefore do not account for the difference. The difference also
+holds at two larger sizes (fourth and fifth rows): $-0.127$ with 12 blocks of width 384 and
+$-0.058$ with 16 blocks of width 512, the latter on four seeds.
+
+The open squares of Figure~\ref{fig:confirm} interpolate the n-gram cache into both models. In
+these five rows, each $\Delta$ retains its sign and decreases in magnitude to between $-0.046$ and
+$-0.021$. The cache recovers 0.123 nats for the 30.4M hybrid (0.749 to 0.627) and 0.027 nats for
+the model with \ingram{} (0.607 to 0.580). Against the parameter-matched hybrid the remaining
+difference is $-0.023$ ($[-0.028, -0.018]$; 8 of 8; Holm $p = 0.008$).
+
+\subsection{Longer training, and a 7:1 hybrid with \ingram{}}
+\label{sec:length}
+
+\begin{figure}[tb]
+\centering
+\input{figures/fig_training}
+\caption{(a) Held-out loss during the 1.31B-token runs of the 7:1 hybrid with \ingram{}, the 3:1
+hybrid and the 7:1 hybrid; lines are means over seeds 20--27 and bands span the lowest and highest
+seed. The final losses are 0.448, 0.510 and 0.508 (last two rows of Figure~\ref{fig:confirm}).
+(b) Loss of the 3:1 hybrid minus loss of the model with \ingram{}, at the evaluations within each
+group of runs (the legend gives our model and the training tokens of the group), on logarithmic
+axes. Every run follows a cosine schedule over its own length; only the last point of each curve
+is a finished run.}
+\label{fig:training}
+\end{figure}
+
+The difference from the 3:1 hybrid decreases when both models are trained for longer (sixth row of
+Figure~\ref{fig:confirm}). With both at 20,000 steps (328M tokens), $\Delta = -0.072$ ($[-0.085,
+-0.061]$; 8 of 8; Holm $p = 0.016$), half of the $-0.142$ at 164M tokens. A further pre-registered
+test allows the hybrid twice the steps of our model (seventh row). It bounds a comparison at equal
+wall-clock, because our training steps with \ingram{} were 1.07 to 1.19 times slower
+(Appendix~\ref{sec:cost}). The model with \ingram{} retains the lower loss ($\Delta = -0.015$,
+$[-0.028, -0.003]$; 6 of 8 seeds; Holm $p = 0.039$). With the n-gram cache on both sides the
+hybrid has the lower loss ($+0.026$, $[+0.020, +0.032]$; 0 of 8 seeds).
+
+The longest runs test a hybrid that retains one of the two attention layers
+(Figure~\ref{fig:training}a). We trained three models for 80,000 steps (1.31B tokens, less than
+one pass over the 1.65B tokens of the training set): a 7:1 hybrid with \ingram{}, the 3:1 hybrid
+and the 7:1 hybrid, all with the learning rates of the 164M-token runs
+(Section~\ref{sec:setup}). The 7:1 hybrid with
+\ingram{} reaches 0.448, which is below the 3:1 hybrid at 0.510, the primary test ($\Delta =
+-0.063$, $[-0.071, -0.054]$; 8 of 8; Holm $p = 0.008$), and below the 7:1 hybrid at 0.508
+($\Delta = -0.060$, $[-0.067, -0.055]$; 8 of 8; Holm $p = 0.008$). With the n-gram cache on both
+sides the differences are $-0.036$ and $-0.034$, each on 8 of 8 seeds.
+
+Without \ingram{}, the two hybrids end at the same loss: the 3:1 hybrid minus the 7:1 hybrid is
+$+0.002$ (95\% CI $[-0.011, +0.014]$; $n = 8$; post hoc). At 1.31B tokens the 7:1 hybrid with
+\ingram{} is therefore 0.06 nats below a hybrid without it at either attention count. Within
+these runs, its advantage over the 3:1 hybrid decreases from 0.280 nats at 8,000 steps to 0.063 at
+80,000, and by 0.006 over the last 8,000 steps, when the cosine schedule is near its floor
+(Figure~\ref{fig:training}b).
+
+\subsection{Contribution of attention when \ingram{} is present}
+\label{sec:types}
+
+\begin{figure}[tb]
+\centering
+\input{figures/fig_grid}
+\caption{Loss against the number of attention layers $A$, for $P \in \{0, 1, 2, 4\}$ placements of
+\ingram{} (8 blocks of width 256, 164M training tokens). Without \ingram{} ($P = 0$) the loss
+falls from 1.002 to 0.722 between no attention and two layers; with one placement all four models
+lie between 0.594 and 0.609. Lines join seed means and small open circles are the two seeds. Panel
+(b) repeats the models with $P \ge 1$ on a finer scale. Seeds 0 and 1 only: the grid is
+exploratory. Seed means and per-seed values are in Tables~\ref{tab:grid}
+and~\ref{tab:gridseeds}.}
+\label{fig:grid}
+\end{figure}
+
+We trained every combination of $A \in \{0, 1, 2, 4\}$ attention layers and $P \in \{0, 1, 2, 4\}$
+placements (Figure~\ref{fig:grid}). Each cell has two seeds and trains for 164M tokens; the grid
+is exploratory, with its analyses fixed before it ran. Without \ingram{}, the loss depends on the
+attention layers: 1.002 with none, 0.995 with one, 0.722 with two and 0.742 with four. With one
+placement, all four cells lie between 0.594 and 0.609, and the largest difference between two
+attention counts is 0.015 nats. Further placements lower the loss at every $A$, to between 0.575
+and 0.584 at $P = 4$. One placement without any attention layer is already 0.113 nats below the
+3:1 hybrid without \ingram{}.
+
+\begin{figure}[tb]
+\centering
+\input{figures/fig_types}
+\caption{Cost of removing both attention layers of a 3:1 hybrid, by token type: the loss with no
+attention layer minus the loss with two, without \ingram{} (open circles) and with one placement
+(filled). Without \ingram{} the cost is largest on far exact repeats (0.646 nats); with one
+placement it is 0.000 there and 0.015 over all tokens. Bars are 95\% bootstrap intervals over the
+32 evaluation windows, with seeds 0 and 1 averaged (exploratory). Percentages are shares of
+evaluation tokens; types overlap and are defined in Table~\ref{tab:tags}. Table~\ref{tab:a3} gives
+all placements and the one type with under 0.5\% of tokens.}
+\label{fig:types}
+\end{figure}
+
+On the same grid, we decompose the cost of removing both attention layers, $C(P) = L(A{=}0, P) -
+L(A{=}2, P)$, by token type (Figure~\ref{fig:types}). Without \ingram{} it is
+0.280 nats per token ($[0.215, 0.344]$). Among the types with at least 1\% of tokens, it is
+largest on far exact repeats, the tokens that continue a match of at least 8 tokens whose previous
+occurrence lies more than 512 tokens back ($+0.646$), and on cues whose earlier continuations all
+agree ($+0.465$). With one placement the cost over all tokens is 0.015 ($[0.010, 0.020]$) and the
+cost on far exact repeats is 0.000 ($[-0.003, 0.003]$).
+
+The remaining cost at $P = 1$ is concentrated on three types, with 2.1\%, 5.4\% and 4.7\% of
+tokens. These are older-value tokens, where the matched cue had several earlier continuations and
+the most recent one is wrong ($+0.053$, $[0.036, 0.073]$); tokens with no earlier match ($+0.053$,
+$[0.026, 0.099]$); and format tokens ($+0.041$, $[0.013, 0.102]$). In the confirmatory runs
+(Table~\ref{tab:types}; post hoc), far exact repeats are 16.4\% of tokens and likewise account for 60\%,
+76\% and 57\% of the difference from the 3:1 hybrid at 164M, 328M and 1.31B tokens. Without
+attention, the model with \ingram{} is worse than the 3:1 hybrid on older-value tokens ($+0.089$,
+$[0.042, 0.138]$ at 328M tokens). With one attention layer, at 1.31B tokens, this type no longer
+favours the 3:1 hybrid ($-0.013$, $[-0.027, 0.000]$).

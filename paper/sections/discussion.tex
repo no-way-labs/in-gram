@@ -1,0 +1,35 @@
+\section{Discussion}
+\label{sec:discussion}
+
+Softmax attention and \ingram{} perform the same kind of operation, in that each adds to the hidden
+state at a position a vector retrieved from earlier positions of the context; they differ in the
+key used for the retrieval. Attention computes its query and keys from hidden states and stores a
+key and a value for every token, whereas the key of \ingram{} is the identity of the last $N$
+tokens, which is known before the forward pass, and \ingram{} stores one vector for every distinct
+cue. Our results indicate how
+much of the retrieval in agentic contexts a key of this kind covers. With one placement, the cost
+of removing both attention layers of a 3:1 hybrid decreases from 0.280 to 0.015 nats per token
+(Figure~\ref{fig:types}), and a model with no attention layer reaches a lower loss than the 3:1
+hybrid at equal training steps (Figure~\ref{fig:confirm}). The remaining cost falls on tokens
+whose continuation an exact match of token ids does not determine: cues with several earlier
+continuations of which the most recent is wrong, tokens with no earlier match, and format tokens.
+
+We conjecture that the attention layers of a hybrid learn a lookup of this kind during training,
+and that \ingram{} provides it from the first step. Two observations are consistent with
+this conjecture: the difference between GDN with \ingram{} and the 3:1 hybrid decreases by half
+between 164M and 328M training tokens, with far exact repeats accounting for more than half of it
+(Section~\ref{sec:types}), and with \ingram{} present the attention layers place less of their far
+attention on the positions that follow an earlier occurrence of the current bigram
+(Appendix~\ref{app:grid}). The conjecture does not extend to older-value tokens, on which the
+model without attention is worse than the hybrid. Our runs also leave open whether the difference
+vanishes with further training: at 1.31B tokens it is 0.063 nats for the 7:1 hybrid with
+\ingram{}, and it decreased by 0.006 over the last 8,000 steps.
+
+The first open question is retrieval at long context: our models are trained and evaluated at
+16,384 tokens, and long-context retrieval is the capability that the 1:1 hybrids of the GLM-5
+ablation lose \citep{glm5}; benchmarks of it would test whether a hybrid with fewer attention layers and
+\ingram{} retains it. The second is scale: our largest model has 115.3M parameters and our longest
+run 1.31B training tokens. The third is the comparison with other in-context memories,
+specifically $N$-gram heads, memories with learned addresses such as Sparse Delta Memory and
+latest exact match attention, and a trained copy head at the output \citep{godey2026}. For devices with a fixed memory budget, we also plan to evaluate a
+bounded slot store and to measure decoding speed with the slots in system memory.

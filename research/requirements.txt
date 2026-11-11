@@ -1,0 +1,11 @@
+# Environment of the paper's runs: Python 3.12, one NVIDIA RTX 4090 (24 GB), CUDA build of PyTorch.
+torch==2.14.*
+numpy
+scipy
+sympy
+pyyaml
+tiktoken                         # GPT-2 tokenizer
+pyarrow                          # reads the dataset's parquet files
+pytest
+# GPU only: Gated DeltaNet layers. Needs CUDA; the analysis scripts and the smoke test run without it.
+flash-linear-attention==0.6.0

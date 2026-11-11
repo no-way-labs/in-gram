@@ -1,0 +1,235 @@
+\section{Token types}
+\label{app:tags}
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\begin{tabular}{@{}lp{0.72\textwidth}@{}}
+\toprule
+Token type & A target token has this type when \\
+\midrule
+Exact repeat, far & the longest earlier match of its preceding context has at least 8 tokens, the
+token after the most recent occurrence of that match is the target, and that occurrence lies more
+than 512 tokens back \\
+Exact repeat, near & the same, with the occurrence at most 512 tokens back \\
+Consistent cue & the longest match has 2 to 7 tokens and every earlier continuation of it equals
+the target \\
+Latest value & the longest match has 2 to 7 tokens and at least two distinct earlier
+continuations, and the most recent one is the target \\
+Older value & as for latest value, but the target is an earlier continuation other than the most
+recent one \\
+Novel token & the target token has not appeared earlier in the window \\
+No match & not even the one token before the target has an earlier occurrence \\
+Near-duplicate line, far & there is no exact match of 8 tokens, the current line has at least 4
+distinct token bigrams, and it shares at least half of them (Jaccard) with a line that ends at
+least 512 tokens before it and contains the target \\
+Closing bracket, far & the target closes a bracket that was opened more than 64 tokens back \\
+Next integer & the target is an integer $n$ and the nearest earlier integer within 200 tokens is
+$n - 1$ \\
+Format & there is no exact match of 8 tokens, the target is punctuation or whitespace, and the
+most recent earlier position preceded by the same sequence of token classes (the 5 to 12 tokens
+before the target in its line) continued with the same token \\
+\bottomrule
+\end{tabular}
+\caption{Token types used in Figure~\ref{fig:types} and Tables~\ref{tab:a3} and~\ref{tab:types}. Types are computed from the
+tokens of each evaluation window alone and can overlap; their shares therefore do not sum to 100\%.
+Match lengths are measured on the ladder 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48 and 64, and a match
+of 2 to 7 tokens is therefore evaluated at length 2, 3, 4 or 6. We
+fixed the definitions before the dose grid ran.}
+\label{tab:tags}
+\end{table}
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\input{generated/tab_types}
+\caption{Loss of the model with \ingram{} minus loss of the 3:1 hybrid, by token type, for
+the three pairs of Table~\ref{tab:confirm} at 8 blocks of width 256 that train both arms equally long (seeds 20--27
+averaged per token). The second column is the share of evaluation tokens. Brackets are 95\%
+bootstrap intervals over the 32 evaluation windows (10,000 resamples). Exploratory; the claims are
+in Section~\ref{sec:types}.}
+\label{tab:types}
+\end{table}
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\input{generated/tab_a3}
+\caption{Cost of removing both attention layers, $C(P) = L(A{=}0, P) - L(A{=}2, P)$ in nats per
+token, by token type and number of placements $P$ (Figure~\ref{fig:types} plots $P = 0$ and $P =
+1$). The second column is the share of evaluation tokens of each type. Brackets are 95\% bootstrap
+intervals over the 32 evaluation windows (10,000 resamples, windows resampled jointly for both
+models, seeds 0 and 1 averaged). Exploratory; the claims are in Section~\ref{sec:types}.}
+\label{tab:a3}
+\end{table}
+
+\begin{table}[!htb]
+\centering
+\small
+\input{generated/tab_a4}
+\caption{Induction share of far attention on the dose grid, as defined in
+Appendix~\ref{app:grid}, and the mean attention mass on keys more than 512 tokens back. Seeds 0
+and 1; exploratory.}
+\label{tab:a4}
+\end{table}
+
+\section{Per-seed losses}
+\label{app:seeds}
+
+No run was dropped from any comparison; a run that failed on the platform was relaunched with the
+same seed. Tables~\ref{tab:seeds164} and~\ref{tab:seedslong} list every confirmatory run and
+Table~\ref{tab:gridseeds} both seeds of every cell of the dose grid.
+
+The first column of Table~\ref{tab:seeds164} is the model with cue lengths 1 to 5. Before we
+adopted the longer cues, a pre-registered single test had compared it with the 3:1 hybrid on the
+same seeds: $\Delta = -0.117$ (95\% CI $[-0.143, -0.099]$; 8 of 8 seeds; $p = 0.0039$).
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\input{generated/tab_seeds_164}
+\caption{Loss per seed at 164M training tokens (10,000 steps), for the comparisons of
+Table~\ref{tab:confirm} and Appendix~\ref{sec:cues}. The last row is the mean over seeds after
+mixing each model with the n-gram cache.}
+\label{tab:seeds164}
+\end{table}
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\input{generated/tab_seeds_long}
+\caption{Loss per seed for the longer runs of Table~\ref{tab:confirm}.
+The third size ran on seeds 20--23 only.}
+\label{tab:seedslong}
+\end{table}
+
+\begin{table}[!htb]
+\centering
+\small
+\input{generated/tab_grid}
+\caption{Seed-mean loss on the dose grid of Figure~\ref{fig:grid} (seeds 0 and 1). Cells with
+$P = 0$ train at learning rate $4 \times 10^{-3}$ and cells with $P \ge 1$ at $2 \times 10^{-3}$
+(Table~\ref{tab:lr}).}
+\label{tab:grid}
+\end{table}
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\input{generated/tab_grid_seeds}
+\caption{Loss on the dose grid, seed 0 / seed 1 (means in Table~\ref{tab:grid}).}
+\label{tab:gridseeds}
+\end{table}
+
+\begin{table}[!htb]
+\centering
+\small
+\input{generated/tab_cues}
+\caption{Loss by cue set for GDN with \ingram{} ($P = 1$, 8 blocks of width 256, 164M
+tokens), seeds 0 and 1 (exploratory; used to select the cue set, Appendix~\ref{sec:cues}). Each cue
+length adds one table of $2^{16}$ rows of width 64. The last column interpolates the model with
+the n-gram cache.}
+\label{tab:cues}
+\end{table}
+
+\section{Learning-rate checks}
+\label{app:lr}
+
+For each model of Table~\ref{tab:lr} we compared two or three learning rates on the selection
+seeds, and each confirmatory arm in the table uses the rate with the lowest mean. The 7:1 hybrid
+and the 7:1 hybrid with \ingram{} have no comparison of their own: they use
+$4 \times 10^{-3}$, the rate of the 3:1 hybrid, and $2 \times 10^{-3}$, the rate of GDN with
+\ingram{}, as do the remaining cells of the dose grid without and with \ingram{}.
+\ingram{}'s rate of $2 \times 10^{-3}$ was tuned with cue lengths 1 to 5 and fixed before the runs
+with long cues; the rows for long cues are a sensitivity check and selected nothing. At 16 blocks
+of width 512 each rate has one seed. The 80,000-step runs of Section~\ref{sec:length} reuse the
+rates selected at 10,000 steps.
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\input{generated/tab_lr}
+\caption{Loss by learning rate on the selection seeds, at 164M training tokens (328M for 16 blocks
+of width 512), 16k context. An entry of n/a marks a run that was not made or was lost to a host
+failure.}
+\label{tab:lr}
+\end{table}
+
+\section{Read rule, quantization and generation}
+\label{app:other}
+
+All results above use the additive read; in a smaller setting (4 blocks of width 256, 4,096-token
+context, the first 4,096 trajectories, 4 windows per step, 128 evaluation windows, cue lengths 1
+to 5, seeds 13--20), we pre-registered a single test of a scored read,
+which stores $K$ notes per slot and weights them by a key computed from the context. With $K = 4$
+it lowers the loss from 0.829 to 0.824, $\Delta = -0.005$ ($[-0.008, -0.003]$; 8 of 8 seeds;
+$p = 0.0039$), and stores 8 vectors of state per slot where the additive read stores one. The
+difference with $K = 8$ is $-0.012$ ($[-0.015, -0.009]$; 8 of 8; reported, not tested). On the
+recipe of this paper (long cues, 16k context), the scored read with $K = 8$ was worse than the
+additive read on both selection seeds (0.629 and 0.608 against 0.610 and 0.602; one learning rate).
+
+We also checked quantization on checkpoints from seeds 0 and 1 that use cue lengths 1 to 5
+(exploratory). Under round-to-nearest quantization applied at evaluation, 4-bit rows of the hashed
+table change the loss of GDN with \ingram{} by $+0.0001$, and rounding the slot state to 4 bits at
+each read by $+0.0005$; the writes are computed at full precision. With 4-bit weights in the
+linear layers whose input width is a multiple of 64, and 8-bit weights in the embedding and the
+output layer, that model loses $+0.003$ and $+0.002$ on the two seeds, against $+0.007$ and
+$+0.008$ for GDN and $+0.010$ and $+0.009$ for the 3:1 hybrid; the read projections $W_K$ and $W_O$ of
+\ingram{}, of input width 325 in these checkpoints, remain at full precision. Keys and values of the hybrid at 8 bits cost at most $+0.001$. Our
+4-bit keys and values are quantized per token, without per-channel scaling, and cost $+0.350$ and
+$+0.064$ on the two seeds.
+
+For generation we provided the same checkpoints with 32 prompts of 4,096 tokens and sampled 256
+new tokens.
+We classify a continuation as a loop when its last 128 tokens are periodic with a period of at most
+64. The reference continuations loop in 7 of the 32 prompts. At temperature 1, every model loops
+in 7 to 9. Under greedy decoding the counts are 16 to 21 for the models with \ingram{}, 16 and 19
+for the 3:1 hybrid, and 18 and 20 for GDN. We detect no increase in looping with \ingram{}
+at 32 prompts and two seeds. Greedy continuations of the models with \ingram{} share more 8-grams
+with the prompt (0.69 to 0.70) than those of the hybrid (0.58 and 0.64) or the references (0.62).
+
+\section{Decode benchmark}
+\label{app:decode}
+
+We timed token-by-token decoding once, on an RTX~4090 at batch size 1, for untrained models of 4
+blocks and width 256 on tokens of WikiText-103: 256 decoded tokens after a prefill of 4,096 to
+1,048,576 tokens. The \ingram{} model in this benchmark is an earlier configuration with ten slot
+streams (cue lengths 1 to 5 under two write rules) of slot width 32, placed on the embeddings,
+with a separate static table of $2^{17}$ rows per stream that has its own gate in place of the
+additive table row. Per decoded token after 4,096 and 1,048,576
+tokens of context, GDN took 4.91 and 4.90~ms, GDN with \ingram{} 6.22 and 6.26~ms, a hybrid with
+one attention layer 4.78 and 5.79~ms, and a model of four attention layers 4.06 and 5.97~ms.
+\ingram{} thus adds 1.3 to 1.4~ms per token at both lengths; the benchmark records one total per
+model and does not separate the host-side hashing from the reads and writes on the accelerator.
+
+\section{Compute}
+\label{app:compute}
+
+Every training run reported in this paper used one rented NVIDIA RTX~4090 with 24~GB of memory.
+The machines came from the Vast.ai marketplace and were rented through Rhombic
+(\url{https://rhombic.space}), an orchestration service that launched the runs, tracked their cost
+and collected their logs. On hosts of different speed, a run of 10,000 steps took 17 to 33
+minutes, a run of 20,000 steps 39 to 74 minutes, and a run of 80,000 steps 2.1 to 3.6 hours. The
+88 runs behind Figure~\ref{fig:confirm} took 103 GPU-hours of training and were billed at 64 US
+dollars with their relaunches, and a run of 80,000 steps cost 1.49 dollars on average. All 534
+logged runs of the project, which include the selection runs and exploratory runs that this paper
+does not report, took 319 hours of training time. The account that rented the machines was billed
+213 dollars in total, for 700 rentals and 420 hours at 0.51 dollars per hour on average, which is
+an upper bound on the cost of the project. Data preparation, the token statistics of Section~\ref{sec:repeats} and all analyses
+ran on CPUs.
+
+\section{Use of AI tools}
+\label{app:ai}
+
+The author proposed the method, the research questions and the framing of this paper, decided which
+experiments to run, reviewed the results and the text, and is responsible for the content of the
+paper. An AI coding assistant (Claude,
+Anthropic, used through Claude Code) wrote most of the code under the author's direction, launched
+and monitored the training runs, wrote the analysis scripts, searched and summarized the related
+work, and drafted the text and the figures. Three practices limit the errors that this division of
+work can introduce. Each confirmatory comparison was committed to the repository as a
+pre-registration before its runs started. The numbers in the results are produced by scripts from
+the run logs and are not typed by hand. The descriptions of the most closely related papers were
+checked against the full text of each paper.

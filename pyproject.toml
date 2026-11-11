@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "in-gram"
+version = "0.1.0"
+description = "In-gram: In-Context N-gram Memory, a reference implementation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Keston Aquino-Michaels" }]
+dependencies = ["numpy>=1.24", "torch>=2.1"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.urls]
+Repository = "https://github.com/no-way-labs/in-gram"
+
+[tool.setuptools]
+packages = ["ingram"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,112 @@
+{
+ "confirmatory": {
+  "runs": 88,
+  "hours": 102.99725216587385,
+  "groups": {
+   "conf6-a2p0": {
+    "runs": 8,
+    "steps": 10000,
+    "hours": 2.595620661377907,
+    "minutes_min": 16.861272569497427,
+    "minutes_max": 20.79656932353973
+   },
+   "conf29-o12481632": {
+    "runs": 8,
+    "steps": 10000,
+    "hours": 3.0973034319612713,
+    "minutes_min": 19.27217117945353,
+    "minutes_max": 33.01741904815038
+   },
+   "conf30-hyb54": {
+    "runs": 8,
+    "steps": 10000,
+    "hours": 3.5408850556612013,
+    "minutes_min": 25.02216473023097,
+    "minutes_max": 29.123737998803456
+   },
+   "b31-static": {
+    "runs": 8,
+    "steps": 10000,
+    "hours": 3.028219888607661,
+    "minutes_min": 20.573172028859457,
+    "minutes_max": 24.618436264991754
+   },
+   "b31-size2": {
+    "runs": 8,
+    "steps": 10000,
+    "hours": 3.768113100065125,
+    "minutes_min": 26.86043405532837,
+    "minutes_max": 30.758486859003703
+   },
+   "b31-size3-locker": {
+    "runs": 4,
+    "steps": 20000,
+    "hours": 4.748889704412884,
+    "minutes_min": 69.31712610324224,
+    "minutes_max": 73.73953647613524
+   },
+   "b31-size3-hybrid": {
+    "runs": 4,
+    "steps": 20000,
+    "hours": 4.79484918779797,
+    "minutes_min": 67.45236240625381,
+    "minutes_max": 74.3175146261851
+   },
+   "b31-longhyb": {
+    "runs": 8,
+    "steps": 20000,
+    "hours": 5.5321520670917295,
+    "minutes_min": 39.46859171390534,
+    "minutes_max": 45.705065917968746
+   },
+   "b31-longloc": {
+    "runs": 8,
+    "steps": 20000,
+    "hours": 6.266174809005525,
+    "minutes_min": 38.65753060181935,
+    "minutes_max": 54.90559078057607
+   },
+   "p32-a2p0": {
+    "runs": 8,
+    "steps": 80000,
+    "hours": 21.548485491077106,
+    "minutes_min": 131.99084485371907,
+    "minutes_max": 180.44028371175128
+   },
+   "p32-a1p1": {
+    "runs": 8,
+    "steps": 80000,
+    "hours": 23.475721266534592,
+    "minutes_min": 157.3238133351008,
+    "minutes_max": 213.4091796875
+   },
+   "p32-a1p0": {
+    "runs": 8,
+    "steps": 80000,
+    "hours": 20.60083750228087,
+    "minutes_min": 123.59822979768117,
+    "minutes_max": 169.55743493239086
+   }
+  }
+ },
+ "all_logged": {
+  "runs": 534,
+  "hours": 318.94980112095675
+ },
+ "ledger": {
+  "campaigns": 200,
+  "spent_usd": 97.576104,
+  "first": "2026-11-09T05:45:30Z",
+  "last": "2026-11-10T01:30:26Z",
+  "p32_campaigns": 24,
+  "p32_mean_usd": 1.486702875,
+  "confirmatory_campaigns": 90,
+  "confirmatory_usd": 63.793496
+ },
+ "account": {
+  "rentals": 700,
+  "hours": 420.5,
+  "usd": 213.28,
+  "usd_per_hour": 0.51
+ }
+}

@@ -1,0 +1,69 @@
+{
+ "meta": {
+  "dataset": "nebius/SWE-rebench-openhands-trajectories",
+  "tokenizer": "gpt2",
+  "tokenizer_spec": "gpt2",
+  "vocab": 50259,
+  "dtype": "uint16",
+  "shift": 2,
+  "eval_frac": 0.05,
+  "salt": "agentic-repo-split-v1",
+  "system": false,
+  "max_rows": 16384,
+  "rows": 16384,
+  "shards": [
+   "0000",
+   "0001",
+   "0002",
+   "0003"
+  ],
+  "splits": {
+   "train": {
+    "trajectories": 15680,
+    "tokens": 1648400389,
+    "repos": 1666,
+    "median_len": 101620.5
+   },
+   "eval": {
+    "trajectories": 704,
+    "tokens": 69798120,
+    "repos": 73,
+    "median_len": 95978.5
+   }
+  }
+ },
+ "files": {
+  "0000.eval.bin": {
+   "bytes": 34789884,
+   "sha256": "ed2736627bea931cceaf7d6db02c26e9e69d403e183696437bdffd1fb289c101"
+  },
+  "0000.train.bin": {
+   "bytes": 822924872,
+   "sha256": "f3ffb6c8c24c010bc2da5c595d4248b7705e825b5ba0a0af77df6175c71be1b3"
+  },
+  "0001.eval.bin": {
+   "bytes": 34469524,
+   "sha256": "2912b3138ad2942dc0e186ef00c556586788e650c9f52ce46ff7bae03eb27393"
+  },
+  "0001.train.bin": {
+   "bytes": 825435046,
+   "sha256": "e2edc04ff44f834e72263943fe9ed3c26c781a2e62609c124603b238637fa273"
+  },
+  "0002.eval.bin": {
+   "bytes": 33627718,
+   "sha256": "adebc6981f0990f61cfc7ecd22906089f734908d3f2f08beb8629ccdbfa9b924"
+  },
+  "0002.train.bin": {
+   "bytes": 819914490,
+   "sha256": "d8198579844f6e474517b548be55cd31b3ddee25678b7371a00e1cb854ce48eb"
+  },
+  "0003.eval.bin": {
+   "bytes": 36709114,
+   "sha256": "cc8cfeb5489e8f9a7dd6e55ce0d0d19fab0757110416f57ea63bd3aafac0899c"
+  },
+  "0003.train.bin": {
+   "bytes": 828526370,
+   "sha256": "7425d9b37bcdd8507b509aa272ff648f10287e71ae63da5d44f9516443745feb"
+  }
+ }
+}

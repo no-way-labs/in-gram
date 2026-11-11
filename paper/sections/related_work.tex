@@ -1,0 +1,54 @@
+\section{Related work}
+\label{sec:related}
+
+Hybrid models interleave softmax attention with linear-attention or state-space layers
+\citep{kimilinear,qwen38fn,nemotron35}, and the releases cited in Section~\ref{sec:intro} retain
+different numbers of softmax layers. One reported cost of replacing softmax layers is long-context
+retrieval: in an ablation of the GLM-5 report, a 1:1 hybrid with Gated DeltaNet, adapted from a
+9B model with attention in every layer, scores 76.76 on RULER at 64k tokens, against 85.35 for
+that model \citep{glm5}. Sparse attention
+reduces what a decoding step reads from the cache, and MATCH \citep{ma2026match} retrieves chunks of
+the input with an external retriever and unmasks their positions in sliding-window attention
+layers. \ingram{} addresses the number of softmax-attention layers and leaves the remaining layers
+unchanged.
+
+Engram \citep{engram2026} adds hashed $N$-gram embedding tables to a Transformer as a static
+memory, and Qwen3.8-Flash-Next has 51B parameters of such tables \citep{qwen38fn}. These tables
+are parameters; \ingram{} uses the same addressing and adds slots that the current context writes.
+Delta N-gram \citep{wu2026deltangram} writes a sparse patch over the hashed $N$-gram table of a
+pretrained model with a block-averaged delta rule at inference time. Its writes persist across requests and its
+writer is trained separately on the frozen model, whereas the slots of \ingram{} are empty at the
+start of every context and are trained with the model. $N$-gram heads \citep{akyurek2024} retrieve by exact match of the preceding $N$
+token ids within the model: an attention mask selects the positions that follow earlier
+occurrences, and their hidden states are averaged uniformly. \ingram{} replaces the mask of that
+implementation by hashed slots, at a constant cost per token in training and decoding, and the
+uniform average by a learned write strength, a gate and a table row; the authors note that a trie
+could serve the matches at inference. Transformers trained on Markov chains learn induction heads that
+implement smoothed in-context $N$-gram estimators \citep{dangelo2026}. At the output of a model,
+cache language models \citep{kuhn1990,grave2017} and pointer mixtures \citep{merity2017}
+interpolate the predicted distribution with a distribution over earlier tokens; our n-gram cache
+baseline belongs to this group. Copy-Paste language models \citep{godey2026} train an
+attention-based copy head beside the output head, and report that a sliding-window model with this
+head matches a full-attention model at 12 times less memory per token. The copy head stores one
+vector per token of context and changes the predicted distribution. \ingram{} stores one vector
+per distinct cue and changes the hidden state, which the later layers read.
+
+Other work extends the state of recurrent models with sparsely addressed memory. Sparse Delta
+Memory \citep{cabannes2026} replaces the dense key-value outer product of Gated DeltaNet by sparse
+reads and writes to a large explicit memory with product-key addresses, and learns the initial
+state of that memory as a parametric component. RAM-Net \citep{xiao2026} selects slots of a fixed
+array with a learned address decoder. Latest exact match attention \citep{broesamle2026} replaces
+softmax attention heads: queries and keys are binarized, and each query attends to the latest key
+identical to it, at a cost per token that is independent of the context length. HOLA
+\citep{cui2026} adds to a delta-rule state a bounded cache of the exact keys and values of the
+tokens with the largest write residual, Resona \citep{wang2025resona} retrieves chunks of the
+input context with a context encoder and a query encoder for linear recurrent models, and Titans \citep{behrouz2025}
+update a neural memory at test time. Product-key memories \citep{lample2019,berges2025} are trained key-value tables
+without in-context writes. These methods compute their keys or addresses with the model,
+whereas \ingram{} derives its addresses from token ids alone: the schedule of writes and reads is
+fixed before the forward pass (Section~\ref{sec:method-train}), and two cues that differ in one
+token address unrelated slots. We regard the two kinds of memory as compatible: in the
+hybrids of \citet{cabannes2026}, Sparse Delta Memory raises long-context retrieval above Gated
+DeltaNet while full attention retains the higher average accuracy on RULER, and the authors note that the
+two may provide complementary capabilities. A learned sparse memory enlarges the state for
+approximate matches, and \ingram{} adds an index for exact ones.

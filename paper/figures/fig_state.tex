@@ -1,0 +1,29 @@
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 1, horizontal sep=2.0cm},
+  height=5.6cm,
+  axis lines=left, axis line style={mute}, tick style={mute},
+  ymajorgrids, grid style={black!8},
+  tick label style={font=\footnotesize}, label style={font=\footnotesize},
+  title style={font=\footnotesize},
+  xmode=log, xmin=0.8, xmax=165,
+  xtick={1.024,4.096,16.384,65.536,131.072}, xticklabels={1k,4k,16k,64k,128k},
+  xlabel={Context length (tokens)},
+]
+\nextgroupplot[title={(a) Slots written per token of context}, width=0.36\textwidth,
+  xtick={1.024,4.096,16.384,131.072}, xticklabels={1k,4k,16k,128k},
+  ymin=0, ymax=6, ytick={0,2,4,6}, ylabel={Slots per token}]
+\addplot[cat3!85!black, thick, mark=*, mark size=1.8pt] table[x=ktok, y=rate]{generated/state.dat};
+
+\nextgroupplot[title={(b) State per session}, width=0.48\textwidth, clip=false,
+  ymode=log, ymin=0.8, ymax=1500, ytick={1,10,100,1000}, yticklabels={1,10,100,1000},
+  ylabel={State (MB)}]
+\draw[black!25, densely dashed] (axis cs:16.384,0.8) -- (axis cs:16.384,1500);
+\addplot[cat2, thick, mark=square*, mark size=1.8pt] table[x=ktok, y=h3]{generated/state.dat};
+\addplot[cat3, thick, mark=triangle*, mark size=2.2pt] table[x=ktok, y=l7]{generated/state.dat};
+\addplot[cat1, thick, mark=*, mark size=1.8pt] table[x=ktok, y=wp]{generated/state.dat};
+\node[font=\footnotesize, anchor=west, text=cat2!85!black] at (axis cs:145,537) {3:1 hybrid};
+\node[font=\footnotesize, anchor=west, text=cat3!70!black] at (axis cs:145,290) {7:1 + \ingram{}};
+\node[font=\footnotesize, anchor=west, text=cat1!85!black] at (axis cs:145,45.5) {GDN + \ingram{}};
+\end{groupplot}
+\end{tikzpicture}

@@ -1,0 +1,86 @@
+\section{Introduction}
+\label{sec:intro}
+
+The cache of a softmax-attention layer stores a key and a value for every token of the context
+\citep{vaswani2017} and therefore grows linearly with context length. For a model shaped like
+Kimi~K3.1~Pro, we estimate that the attention cache and index of a single 1M-token session occupy
+32.3~GB of accelerator memory (Section~\ref{sec:serving}). Sparse attention reduces the portion of
+the cache that is read at each decoding step and leaves its size unchanged \citep{nemotron35}.
+Recent open hybrid models reduce the cache size by mixing softmax-attention layers with a larger
+number of linear-attention layers, whose state has a fixed size. Qwen3.8-Flash-Next retains
+softmax attention in 12 of its 48 layers and uses Gated DeltaNet in the remainder
+\citep{qwen38fn,qwen38fncard,yang2025gdn}. Kimi~K3.1~Pro has 69 layers of Kimi Delta Attention and 24 of softmax
+attention \citep{kimik31,kimilinear}, and Ling~3.1 Flash uses a 7:1 ratio \citep{ling31flash}.
+GLM-5.3-Flash is the first model of the GLM series to combine linear and sparse attention, with
+three linear-attention layers for each sparse-attention layer \citep{glm53flash}. The
+softmax-attention layers of Qwen3.8-Flash-Next and Kimi~K3.1~Pro are likewise sparse as released,
+and MiniMax-M3.1-Flash uses sparse attention in every layer, with no linear-attention layer
+\citep{minimaxm31flash}.
+
+One role of the remaining softmax-attention layers is the retrieval of earlier tokens. The
+Qwen3.8-Flash-Next report states that these layers ``retain direct token-level retrieval that is
+difficult for any finite-state recurrent memory to reproduce exactly'' \citep{qwen38fn}. The
+GLM-5.3-Flash announcement assigns ``local dependencies'' to linear attention and the retrieval
+of ``relevant global context'' to sparse attention \citep{glm53flash}. Agent
+trajectories frequently repeat their own earlier text: in SWE-rebench trajectories of 16,384
+tokens, a lookup that copies the continuation of the longest earlier match predicts 78.8\% of next
+tokens (Section~\ref{sec:repeats}).
+
+Two other mechanisms use the statistics of earlier text without softmax attention, static hashed
+$N$-gram tables and cache language models. Static hashed $N$-gram tables, as in Engram \citep{engram2026} and the $N$-gram embedding of Qwen3.8-Flash-Next, are
+parameters: they encode statistics of the training corpus and contain no information from the
+current context. Cache language models \citep{kuhn1990,grave2017} interpolate the prediction of a
+model with a distribution over the tokens that occurred earlier in the context. As a baseline we
+use a cache of this kind that predicts the next token from counts of what followed earlier
+occurrences of the current $N$-gram, and we refer to it as the n-gram cache; it operates at
+inference time, outside the trained model, and has no learned memory. It shows that a lookup by exact $N$-gram match supplies recall that the
+softmax-attention layers of a hybrid have not learned: after 164M training tokens, a 3:1 hybrid of
+30.4M parameters reaches 0.749 nats per token, and interpolating its predictions with those of the
+n-gram cache reduces this to 0.627 (Section~\ref{sec:replace}). The cache, however, is not trained
+and changes only the output distribution; no layer of the model can read it, and the model keeps
+its softmax-attention layers and their cache.
+
+\begin{figure}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/fig_overview}}
+\caption{(a) The three models of our main comparisons, each with 8 blocks: a 3:1 hybrid with softmax
+attention in blocks 4 and 8, a Gated DeltaNet (GDN) model with \ingram{} after block 1, and a 7:1
+hybrid with \ingram{}. The number below each model is the state that a decoder stores per session
+at 16,384 tokens (Section~\ref{sec:serving}). (b) \ingram{} for one cue length, on tokens of a
+held-out trajectory that names a variable \texttt{tmp\_folder}. When a token follows the cue $c$,
+here the two tokens \texttt{tmp} and \texttt{\_}, the model computes a note $v$ from the hidden
+state at that token and writes it into the slot $S_c$, which is addressed by the hash of $c$. When
+$c$ ends at a later position, the model reads $S_c$, adds the learned table row $R_c$, and adds the
+result to the hidden state through a learned gate $\alpha$ and projection $W_O$; $\beta$ is a
+learned write strength. In the training trajectories this cue is most often followed by
+\texttt{path} and not by \texttt{folder} (Section~\ref{sec:method-rw}).}
+\label{fig:overview}
+\end{figure}
+
+We introduce In-Context N-gram Memory (\ingram{}; Figure~\ref{fig:overview}), which performs this
+lookup within the model and is trained end to end. At each position, and for each of six cue lengths $N$ from 1 to 32, the
+model writes a note into a slot addressed by the hash of the preceding $N$ tokens. When the same
+$N$-gram ends at a later position, the model reads that slot. Because the addresses depend only on
+token ids, the schedule of writes and reads is known before the forward pass. Training is
+therefore parallel over the sequence, and decoding requires one read and one write per cue length
+for each token, independent of context length. \ingram{} adopts the hashed addressing of Engram
+and adds in-context writes. It is a write-based form of $N$-gram heads \citep{akyurek2024}, which
+match earlier positions through an attention mask. We insert it once, after the first block of a
+Gated DeltaNet model or hybrid.
+
+We evaluate \ingram{} in Gated DeltaNet models and hybrids of 55.9M to 115.3M parameters and
+compare them with hybrids of 30.4M to 88.4M parameters that lack it, all trained
+on SWE-rebench agent trajectories with a context of 16,384 tokens. We compare models at equal
+training steps on eight seeds and commit each test to the repository before the runs that it adds
+(Section~\ref{sec:setup}). After 164M training tokens, a model with \ingram{} and no softmax
+attention reaches a loss 0.102 nats per token lower than a parameter-matched 3:1 hybrid
+(Figure~\ref{fig:confirm}). A
+difference remains when the hybrid is given the same hashed table without writes (0.137 nats) and
+when the n-gram cache is interpolated into both models (0.023 nats). After 1.31B training tokens,
+a 7:1 hybrid with \ingram{} reaches 0.448 nats per token, compared with 0.510 for the 3:1 hybrid
+and 0.508 for the 7:1 hybrid without \ingram{} (Figure~\ref{fig:training}). In a session of 131,072 tokens, \ingram{}'s state in our
+models is 6.0 times smaller than the cache of one softmax-attention layer
+(Figure~\ref{fig:state}). Section~\ref{sec:serving} estimates the consequence for serving: if a model shaped like
+Qwen3.8-Flash-Next maintains its loss with half of its softmax-attention layers and \ingram{},
+the largest context that fits on a laptop with 128~GB of memory increases from 434k to 744k
+tokens.

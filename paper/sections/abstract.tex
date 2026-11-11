@@ -1,0 +1,14 @@
+\begin{abstract}
+Recent open hybrid language models mix linear-attention and softmax-attention layers at ratios
+up to 7:1, and the softmax-attention cache grows with the context. One role of softmax
+attention is to recall earlier text verbatim. In software-agent trajectories, copying what
+followed the longest earlier match predicts 78.8\% of next tokens. We introduce In-Context N-gram
+Memory (\ingram{}), in which each occurrence of an $N$-gram writes a note into a slot addressed by
+the $N$-gram's hash, and later occurrences read that slot at a constant cost per token. At equal
+training steps on 16k-token agentic contexts, \ingram{} lets a hybrid reach lower loss with fewer softmax-attention layers
+than a 3:1 hybrid without it. After 164M training tokens, an \ingram{} model with no
+softmax-attention layers is 0.102 nats per token below a parameter-matched 3:1 hybrid. With eight
+times more training (1.31B tokens), a 7:1 hybrid with \ingram{} is 0.06 nats below both a 3:1 and
+a 7:1 hybrid without it. \ingram{}'s state in our models is 2.8 times smaller than the cache of a single
+softmax-attention layer after 16k tokens of a session, and 6.0 times smaller after 131k.
+\end{abstract}

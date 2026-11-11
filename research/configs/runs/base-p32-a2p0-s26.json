@@ -1,0 +1,52 @@
+{
+ "run": {
+  "run_id": "base-p32-a2p0-s26",
+  "arm": "base",
+  "seed": 26,
+  "task": {
+   "name": "agentic",
+   "L_max": 16384,
+   "tokenizer": "gpt2",
+   "max_rows": 16384
+  },
+  "steps": 80000,
+  "lr": 0.004,
+  "overrides": {
+   "d_model": 256,
+   "n_blocks": 8,
+   "heads": 4,
+   "mlp_hidden": 512,
+   "mixer": [
+    "gdn",
+    "gdn",
+    "gdn",
+    "attn",
+    "gdn",
+    "gdn",
+    "gdn",
+    "attn"
+   ],
+   "rope": true,
+   "pos_emb": false,
+   "attn_conv": 4
+  },
+  "batch": 1,
+  "eval_every": 8000,
+  "eval_size": 32,
+  "warmup": 200,
+  "lr_schedule": "cosine",
+  "adam_beta2": 0.999
+ },
+ "post_eval": {
+  "n": 32,
+  "batch": 1,
+  "task": {
+   "name": "agentic",
+   "L_max": 16384,
+   "tokenizer": "gpt2",
+   "max_rows": 16384
+  },
+  "attn_stats": true,
+  "far": 512
+ }
+}

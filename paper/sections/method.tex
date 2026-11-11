@@ -1,0 +1,109 @@
+\section{Method}
+\label{sec:method}
+
+\ingram{} is a layer inserted between two blocks of a sequence model, and each insertion is a
+\emph{placement}. At every position the layer writes to and reads from a memory whose entries are
+addressed by a hash of the preceding $N$ token ids, the \emph{cue}; positions interact only
+through this memory. Figure~\ref{fig:overview}b shows one write and one read for one cue length.
+
+\subsection{Cues, slots and table rows}
+\label{sec:method-cues}
+
+Let $w_1, \dots, w_L$ be the token ids of a context, and let $x_t \in \mathbb{R}^d$ be the hidden
+state at position $t$ where the layer is inserted. For a cue length $N$, the cue at position
+$t \ge N$ is the $N$-gram $c = (w_{t-N+1}, \dots, w_t)$ that ends there. A polynomial hash maps it
+to a 61-bit address,
+\begin{equation}
+a_N(c) = \Bigl( \sum_{i=0}^{N-1} (w_{t-i} + 1)\, p_N^{\,i} \bmod (2^{61} - 1) \Bigr) \oplus s_N ,
+\label{eq:hash}
+\end{equation}
+with a prime $p_N$ and a constant $s_N$ for each cue length. We use six cue lengths, $N \in \{1,
+2, 4, 8, 16, 32\}$, and each has its own memory.
+
+A cue addresses two vectors of width $d_m = 64$, a slot and a table row. The \emph{slot} $S_c$
+belongs to the current context: it is created at zero when the context first writes to $c$ and is
+keyed by the full address, and two different cues therefore share a slot only if their 61-bit
+addresses collide. The \emph{table row} $R_c$ is a parameter that all contexts share, one row of a
+learned table with $2^{16}$ rows per cue length, selected by a second hash of the address (the
+splitmix64 finalizer) reduced modulo $2^{16}$. Different cues can
+share a row, as in hashed $N$-gram embeddings \citep{engram2026}.
+
+\subsection{Write and read}
+\label{sec:method-rw}
+
+At every position $p$ and for each cue length, the layer writes to the slot of the cue $c$ that
+ends at $p - 1$. The note $v_p$ and the write strength $\beta_p$ are computed from the hidden
+state at $p$:
+\begin{equation}
+v_p = W_v x_p, \qquad \beta_p = \sigma(u^{\top} x_p + b), \qquad
+S_c \leftarrow S_c + \beta_p\, (v_p - S_c) .
+\label{eq:write}
+\end{equation}
+$W_v \in \mathbb{R}^{d_m \times d}$, $u \in \mathbb{R}^d$ and $b$ are learned for each cue length.
+The note describes the token that followed the cue, and the slot is a weighted sum of the notes
+written under the cue: its weights sum to less than one because the slot starts at zero, and of
+two notes with equal write strength the later one has the larger weight.
+
+At position $t$ and for each cue length, the layer reads the slot and the table row of the cue $c$
+that ends at $t$:
+\begin{equation}
+r^N_t = R_c + S_c .
+\label{eq:read}
+\end{equation}
+Here $S_c$ contains the writes of all positions before $t$. If the context has not yet written to
+$c$, $S_c$ is zero and a flag $e^N_t$ is set to 1. A position $t < N$ has no cue of length $N$;
+its read is zero with the flag set. Let $m_t$ be the concatenation of $r^N_t$ and
+$e^N_t$ over the six cue lengths. The layer adds a gated projection of $m_t$ to the hidden state:
+\begin{equation}
+\alpha_t = \sigma\!\left( \frac{\langle \mathrm{norm}(x_t),\, \mathrm{norm}(W_K m_t) \rangle}{\sqrt{d}} \right),
+\qquad x_t \leftarrow x_t + \alpha_t\, W_O m_t ,
+\label{eq:gate}
+\end{equation}
+where $\mathrm{norm}$ is RMS normalization with a learned gain and $W_K, W_O \in \mathbb{R}^{d
+\times 6(d_m + 1)}$. The gate $\alpha_t$ is a scalar that compares the read with the hidden state,
+and the model can use it to attenuate a read that does not fit the current context.
+
+When the cue that ends at $t$ also ended at an earlier position $t'$, its slot contains a note
+computed from $x_{t'+1}$, the hidden state at the token that followed. The read therefore supplies
+position $t$, which predicts $w_{t+1}$, with a representation of the earlier continuations of its
+last $N$ tokens, for six values of $N$ at once. The table row is trained over the whole corpus,
+and it is the entire read for a cue that the context has not written. The example of
+Figure~\ref{fig:overview}b shows the two roles: in the first 16,384 tokens of that held-out
+trajectory, the cue \texttt{tmp\_} occurs 18 times and is followed by \texttt{folder} each time,
+whereas in the first 16,384 tokens of 2,000 sampled training trajectories it occurs 385 times,
+followed by \texttt{path} in 230 of them (59.7\%) and by \texttt{folder} in none. With the writes disabled the
+layer reduces to a static $N$-gram table, which we use as a control (Section~\ref{sec:replace}).
+
+\subsection{Training and decoding}
+\label{sec:method-train}
+
+Because the addresses depend on token ids alone, the positions that write to each slot, and the
+state that each read receives, are known before the forward pass. For every batch we compute this
+schedule on the CPU: the writes are sorted by slot and position, and each read receives a pointer
+to the last write that precedes it. The write of Equation~\ref{eq:write} is an affine map of the
+slot, $S \mapsto (1 - \beta) S + \beta v$, and a composition of affine maps is affine. A parallel
+prefix scan within each slot \citep{hillis1986} thus yields the state after every write, at a
+depth logarithmic in the largest number of writes to one slot. The scan computes the same states
+as sequential execution of the writes, and gradients reach the notes, the write strengths, the
+gate and the table rows.
+
+During decoding, each new token hashes one cue per cue length, reads one slot and one table row,
+and writes one slot, at a cost that is independent of the length of the context. The state of a
+session is one vector of width $d_m$ for every cue it has written, and a token adds at most one
+slot per cue length; Section~\ref{sec:serving} reports the measured counts.
+
+\subsection{Configuration}
+\label{sec:method-config}
+
+Unless we state otherwise, a model with \ingram{} uses one configuration, which we fixed before
+the confirmatory runs that use it. Its cue lengths were selected on seeds 0 and 1
+(Appendix~\ref{sec:cues}), after an earlier confirmatory comparison with cue lengths 1 to 5
+(Appendix~\ref{app:seeds}).
+It has the six cue lengths above, $d_m = 64$, $2^{16}$ table rows per cue
+length, and one placement after the first block. The table has $6 \times 2^{16} \times 64 =
+25.2$M parameters, and at model width 256 the projections of the layer have 0.3M. The dose grid of
+Section~\ref{sec:types} also trains models with two placements, after blocks 1 and 5, and with
+four, after blocks 1, 3, 5 and 7. Each placement has its own slots and projections, and all
+placements of a model share one table. Appendix~\ref{app:other} reports a variant, the scored
+read, which keeps the last $K$ notes of a slot separately, each with a key, and weights them and
+the table row by attention from the reading position.

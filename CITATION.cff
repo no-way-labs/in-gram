@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite the paper."
+title: "In-gram: In-Context N-gram Memory for Hybrid Language Models with Fewer Attention Layers"
+type: software
+authors:
+  - family-names: Aquino-Michaels
+    given-names: Keston
+    affiliation: No Way Labs
+repository-code: "https://github.com/no-way-labs/in-gram"
+license: MIT
+date-released: "2026-11-10"
+preferred-citation:
+  type: report
+  title: "In-gram: In-Context N-gram Memory for Hybrid Language Models with Fewer Attention Layers"
+  authors:
+    - family-names: Aquino-Michaels
+      given-names: Keston
+      affiliation: No Way Labs
+  year: 2026
+  url: "https://github.com/no-way-labs/in-gram"

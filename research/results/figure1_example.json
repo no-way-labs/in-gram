@@ -1,0 +1,47 @@
+{
+ "cue": [
+  "tmp",
+  "_"
+ ],
+ "trajectory": 186,
+ "window": 16384,
+ "text_at_first_occurrence": "     self.tmp_folder1 = temp_folder",
+ "in_trajectory": {
+  "uses": 18,
+  "continuations": {
+   "folder": 18
+  }
+ },
+ "training_sample": {
+  "trajectories": 2000,
+  "with_cue": 58,
+  "uses": 385,
+  "continuations": {
+   "path": 230,
+   "dir": 71,
+   "py": 23,
+   "ip": 22,
+   "md": 18,
+   "filename": 6,
+   "install": 3,
+   "ent": 3,
+   "info": 2,
+   "table": 2
+  },
+  "folder": 0
+ },
+ "other_held_out": {
+  "trajectories": 703,
+  "with_cue": 24,
+  "uses": 120,
+  "continuations": {
+   "folder": 78,
+   "path": 31,
+   "dir": 6,
+   "file": 2,
+   "fo": 1,
+   "settings": 1,
+   "config": 1
+  }
+ }
+}

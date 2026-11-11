@@ -1,0 +1,33 @@
+\input{generated/a3_labels}
+\begin{tikzpicture}
+\begin{axis}[
+  scale only axis, width=8.6cm, height=6.2cm,
+  xmin=-0.04, xmax=0.82, ymin=0.4, ymax=11.6,
+  axis x line*=bottom, axis y line*=left, axis line style={mute}, tick style={mute},
+  y axis line style={draw=none}, ytick style={draw=none},
+  xmajorgrids, grid style={black!8},
+  xtick={0,0.2,0.4,0.6,0.8},
+  xticklabel style={/pgf/number format/fixed, /pgf/number format/precision=1, /pgf/number format/zerofill},
+  tick label style={font=\footnotesize}, label style={font=\footnotesize},
+  xlabel={Loss without attention minus loss with two attention layers (nats per token)},
+  ytick={11,10,9,8,7,6,5,4,3,2,1},
+  yticklabels/.expand once=\atypelabels,
+  yticklabel style={font=\footnotesize, align=right},
+  legend style={font=\footnotesize, draw=none, fill=white, fill opacity=0.85, text opacity=1,
+                at={(0.98,0.03)}, anchor=south east},
+  legend cell align=left,
+]
+\draw[ink!60, line width=0.5pt] (axis cs:0,0.4) -- (axis cs:0,11.6);
+\draw[black!15, line width=0.4pt] (axis cs:-0.04,10.5) -- (axis cs:0.82,10.5);
+\addplot[only marks, mark=o, mark size=2.3pt, ink!70, mark options={line width=0.9pt},
+  error bars/.cd, x dir=both, x explicit, error bar style={line width=0.9pt, ink!55}, error mark options={draw=none}]
+  table[x=c0, y expr=\thisrow{y}+0.15, x error minus expr=\thisrow{c0}-\thisrow{lo0},
+        x error plus expr=\thisrow{hi0}-\thisrow{c0}]{generated/a3.dat};
+\addlegendentry{without \ingram{}}
+\addplot[only marks, mark=*, mark size=2.3pt, cat1,
+  error bars/.cd, x dir=both, x explicit, error bar style={line width=1.1pt, cat1}, error mark options={draw=none}]
+  table[x=c1, y expr=\thisrow{y}-0.15, x error minus expr=\thisrow{c1}-\thisrow{lo1},
+        x error plus expr=\thisrow{hi1}-\thisrow{c1}]{generated/a3.dat};
+\addlegendentry{with \ingram{}, one placement}
+\end{axis}
+\end{tikzpicture}

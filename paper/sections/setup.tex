@@ -1,0 +1,55 @@
+\section{Experimental setup}
+\label{sec:setup}
+
+We train and evaluate on SWE-rebench agent trajectories that were recorded with OpenHands
+\citep{swerebench,swerebenchtraj,openhands}. Each trajectory is rendered as text in message order: the message text, each
+tool call as JSON of its name and arguments, and each tool output verbatim. The system prompt,
+which is the same in every trajectory, is omitted. We tokenize with the GPT-2 byte-pair vocabulary
+and use the first 16,384 trajectories of the dataset. A hash of the repository name assigns each
+repository to training or evaluation, and no repository therefore occurs in both: 15,680
+trajectories (1.65B tokens) form the training set and 704 trajectories (69.8M tokens) are held
+out. A training example is a window of 16,384 consecutive tokens from one trajectory. Trajectories
+are drawn with probability proportional to their length, and the start of the window is uniform.
+
+Every model is a stack of blocks, each of which applies a sequence mixer and then an MLP with one
+hidden layer of twice the model width and GELU activations; both are preceded by RMS normalization
+and have a residual connection. The mixer is either Gated DeltaNet (GDN) \citep{yang2025gdn}, in the
+implementation of the flash-linear-attention library, or causal softmax attention with rotary
+position embeddings. Both use heads of width 64 and a causal depthwise convolution of kernel size
+4 on queries, keys and values. The input embedding and the output layer are separate matrices. $A$ counts the
+softmax-attention layers of a model and $P$ the placements of \ingram{}. With 8 blocks, a 3:1
+hybrid has attention in blocks 4 and 8 and a 7:1 hybrid in block 4; the deeper 3:1 hybrids have
+attention in every fourth block. The dose grid of Section~\ref{sec:types} also has models with no
+attention and with attention in every second block. We use three sizes: 8 blocks of width 256, 12 blocks of width 384
+and 16 blocks of width 512. Unless we state otherwise, a model has 8 blocks of width 256, and
+\ingram{} has the configuration of Section~\ref{sec:method-config}.
+
+All models train with AdamW ($\beta_1 = 0.9$, $\beta_2 = 0.999$), a weight decay of 0.1 on weight
+matrices other than the embedding and the hashed table, and gradient clipping at norm 1. A step is
+one window, and 10,000 steps therefore amount to 164M tokens. The learning rate rises linearly
+over 200 steps and then follows a cosine to 1\% of its peak at the end of the run. For each model
+of Table~\ref{tab:lr} we selected the peak among two or three values on seeds 0 and 1. The 7:1
+hybrids and the remaining cells of the dose grid have no selection of their own and use
+$4 \times 10^{-3}$ without \ingram{} and $2 \times 10^{-3}$ with it (Appendix~\ref{app:lr}). Training
+uses bfloat16 autocast, with the reads and writes of \ingram{} in 32-bit floats, on one rented
+RTX~4090 per run (Appendix~\ref{app:compute}).
+
+We evaluate every model on the same 32 held-out windows of 16,384 tokens. \emph{Loss} is the mean
+negative log-likelihood per token on these windows, in nats. We selected learning rates and cue
+lengths on seeds 0 and 1 (Tables~\ref{tab:lr} and~\ref{tab:cues}). Confirmatory comparisons use
+seeds 20--27, which were not used for selection: $n = 8$ runs per arm, paired by seed. A seed sets
+the initialization and the order of the training windows: step $k$ of seed $s$ draws its window
+from a generator seeded with $1000s + k$, two seeds that differ by one therefore train on the same
+windows at an offset of 1,000 steps, and both models of a pair train on the same windows. For each
+comparison we committed the arms, the metric and the test to the repository before the runs of its
+new arms started; in rows 1 to 4 and 7 of Figure~\ref{fig:confirm}, one of the two arms consists
+of runs from an earlier comparison. The
+test is a one-sided Wilcoxon signed-rank test on the paired differences, with a Holm correction
+inside each pre-registered family of two to four tests. With $n = 8$ the smallest attainable $p$
+is $1/256 = 0.0039$; the Holm-adjusted values $0.008$, $0.012$ and $0.016$ in our tables therefore
+all indicate that the eight differences share one sign. We write $\Delta$ for the loss of the
+model with \ingram{} minus the loss of the reference, and report its mean with a 95\%
+percentile-bootstrap interval over seeds (10,000 resamples). Results on seeds 0 and 1 are
+exploratory and are labelled as such. The code that produced these results, the configuration, log and
+per-token losses of every run, a reference implementation of \ingram{} and the pre-registration
+files with their commit times are available at \url{https://github.com/no-way-labs/in-gram}.

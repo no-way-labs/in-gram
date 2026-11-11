@@ -1,0 +1,153 @@
+\section{Tests and additional results}
+\label{app:extra}
+
+\subsection{Losses and tests of the pre-registered comparisons}
+\label{app:tests}
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.0pt}
+\input{generated/tab_main}
+\caption{Losses and tests for the comparisons of Figure~\ref{fig:confirm}, in the same order, at
+16k context on seeds 20--27 ($n = 8$, paired; $n = 4$ at $16\times512$). Models are given as
+blocks $\times$ width with their parameter count; in the first group every reference is a 3:1
+hybrid, and ``+ table'' marks the one with a static $N$-gram table. Loss is the mean over seeds; $\Delta$ is ours
+minus reference, with its 95\% bootstrap interval over seeds below it. $p_{\mathrm{Holm}}$ is the
+one-sided Wilcoxon $p$ after Holm correction within the pre-registered family. In the row marked
+164M/328M our model trains for 164M tokens and the reference for 328M
+(Section~\ref{sec:length}). The with-cache difference was tested in the first two rows (same
+adjusted $p$) and is reported without a test in the others. Per-seed losses are in
+Tables~\ref{tab:seeds164} and~\ref{tab:seedslong}.}
+\label{tab:confirm}
+\end{table}
+
+Table~\ref{tab:confirm} lists the losses and tests behind Figure~\ref{fig:confirm}. Across the 32
+evaluation windows, the share of tokens that the lookup of Section~\ref{sec:repeats} predicts
+ranges from 63.4\% to 98.4\%, and from 8k tokens of depth on, tokens for which an older
+continuation is the right one stay between 5.3\% and 7.9\% (Figure~\ref{fig:repeats}b). In the
+first row, the mean difference without the outlier seed is $-0.131$. The hybrid of the
+parameter-matched control has 54.2M parameters, of which 15.6M lie outside the embedding and
+output layers,
+against 5.1M for our model outside embedding, output and table. With 12 blocks of width 384, GDN
+with \ingram{} has 80.3M parameters against 54.2M for the 3:1 hybrid, and with 16 blocks of width
+512, trained for 20,000 steps on four seeds per arm, 115.3M against 88.4M.
+
+\subsection{Training length}
+\label{app:length}
+
+Between 164M and 328M training tokens the hybrid improves by 0.127 nats and the model with
+\ingram{} by 0.057. On seeds 0 and 1 at 164M tokens, the 7:1 hybrid reaches 0.995 without
+\ingram{} and 0.607 with it, against 0.722 for the 3:1 hybrid (Figure~\ref{fig:grid}); the
+1.31B-token runs test whether this ordering persists with eight times more training. Without
+\ingram{}, the benefit of the second attention layer decreases with training length (post hoc). It
+is 0.27 nats at 164M tokens on seeds 0 and 1, and 0.075 nats at 8,000 steps of the long runs. From
+56,000 steps on, the two means differ by at most 0.003 (Figure~\ref{fig:training}a), and at the
+end 3 of 8 seeds have the 3:1 hybrid below the 7:1 hybrid. The model with \ingram{} also varies
+less across seeds at the end of training: the standard deviation over seeds is 0.002, against
+0.013 for the 3:1 hybrid and 0.010 for the 7:1 hybrid.
+
+\subsection{Step time and state}
+\label{sec:cost}
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\input{generated/tab_cost}
+\caption{Cost of the models in Table~\ref{tab:confirm}. Seconds per step are wall-clock time per
+training step, including data loading and the periodic evaluations, over seeds 20--27; at each
+evaluation a model with \ingram{} runs three additional passes with its reads ablated, which are
+included. Each run used one rented RTX~4090, and hosts differ between runs. State is the fp32 size of what a decoder
+stores per session after 16,384 tokens, computed as described in Appendix~\ref{sec:cost};
+Figure~\ref{fig:state} extends it to longer contexts.}
+\label{tab:cost}
+\end{table}
+
+Training steps with \ingram{} were slower in our runs (Table~\ref{tab:cost}). Over seeds 20--27,
+GDN with \ingram{} takes a median of 0.130 seconds per step (range 0.116 to 0.198) and the 3:1
+hybrid 0.122 (0.101 to 0.125). Because the runs used different rented hosts, the times are
+unpaired: the ratio of medians is 1.07 and the ratio of means is 1.19. The test of
+Section~\ref{sec:length} that allows the hybrid twice the steps favours the hybrid for any
+step-time ratio below 2.
+
+We compute the state that a decoder stores per session at 16,384 tokens, in fp32
+(Table~\ref{tab:cost}): keys and values of the model width for every token in each attention
+layer, the recurrent state of each GDN block, and one 64-dimensional vector per written slot of
+\ingram{} (47,426 slots on average for a held-out session read from its first token; the hash
+index is not counted). This amounts to 12.7~MB for GDN with \ingram{}, 67.5~MB for the 3:1 hybrid
+and 46.2~MB for the 7:1 hybrid with \ingram{}. The evaluation windows are cut inside sessions and
+contain fewer new cues: 29,337 slots on average, or 1.79 per token.
+
+\subsection{Dose grid and attention statistics}
+\label{app:grid}
+
+In the grid of Figure~\ref{fig:grid}, four attention layers reach 0.732 at their better learning
+rate, and a model of eight attention layers with no GDN reaches 0.766 at its better learning rate
+(Table~\ref{tab:lr}). On these two seeds the 3:1 hybrid is therefore the best model without
+\ingram{}. With two placements the four cells lie between 0.584 and 0.590.
+
+The summary we fixed in advance is the iso-loss attention $A^{*}(P)$: the number of attention
+layers that a model with $P$ placements needs in order to match the 3:1 hybrid without \ingram{}
+(0.722), found by linear interpolation over $A$. For $P = 1$, $2$ and $4$, the cell with no
+attention is already below that loss on both seeds, by 0.113, 0.131 and 0.138 nats in the seed
+mean, and hence $A^{*}(P) \le 0$ for every $P$ we ran.
+
+With four placements the cost of removing both attention layers is 0.001 over all tokens
+($[-0.001, 0.003]$), and the intervals for older-value tokens ($+0.016$, $[0.003, 0.029]$) and for
+tokens with no match ($+0.013$, $[0.005, 0.021]$) still exclude zero (Table~\ref{tab:a3}).
+\ingram{} also covers near-duplicate lines, which we had expected to depend on attention: their
+cost decreases from $+0.261$ at $P = 0$ to $+0.011$ at $P = 1$. Tokens with no match change least
+($+0.048$ and $+0.053$). On seeds 20--27 without attention, the model with \ingram{} is also worse
+than the 3:1 hybrid on format tokens ($+0.012$, $[0.005, 0.020]$ at 328M tokens); with one
+attention layer, at 1.31B tokens, it is not ($-0.007$, $[-0.013, -0.004]$).
+
+To measure where the attention layers attend, we define the induction share of far attention as
+the fraction of the attention mass on keys more than 512 tokens back that falls on positions
+directly after an earlier occurrence of the current bigram, averaged over heads and layers
+(Table~\ref{tab:a4}). In the 3:1 cells it is 0.233 without \ingram{} and 0.136, 0.181 and 0.174 at
+$P = 1$, $2$ and $4$; with four attention layers it is 0.211 and then 0.154, 0.150 and 0.109. The
+share is lower with \ingram{} in the seed mean of all six cells and in ten of the twelve
+single-seed comparisons.
+
+\subsection{Cue lengths and further checks}
+\label{sec:cues}
+
+On seeds 0 and 1, longer cues lower the loss (Table~\ref{tab:cues}): 0.633 with cue lengths 1 to
+5, 0.614 with $\{1, 2, 4, 8, 16\}$ at the same parameter count, and 0.606 with $\{1, 2, 4, 8, 16,
+32\}$. We selected between $\{1, 2, 3, 5, 8, 16\}$ and $\{1, 2, 4, 8, 16, 32\}$ on these seeds by
+a rule fixed in advance, the lower mean loss. On seeds 20--27, the selected set reaches 0.607 against 0.632 for cue lengths 1
+to 5, $\Delta = -0.025$ ($[-0.028, -0.022]$; 8 of 8; Holm $p = 0.012$); this was the primary test
+of its family. The n-gram cache contributes less when the cues are long: it lowers the loss by
+0.038 nats with cue lengths 1 to 5 and by 0.027 with the selected set, and with the cache on both
+sides the difference between the two cue sets is $-0.014$ ($[-0.016, -0.012]$; reported, not
+tested). Placements and long cues combine: on seeds 0 and 1, two placements reach 0.608 with cue
+lengths 1 to 5 and 0.590 with the selected set (Table~\ref{tab:grid}).
+
+Appendix~\ref{app:other} reports three further checks: a scored read rule lowers the loss by
+0.005 nats in a smaller setting and was worse than the additive read on both selection seeds of
+this recipe; rounding the rows of the hashed table and the slot state at each read to 4 bits
+changes the loss by at most 0.0005 nats; and we detect no increase in looping under generation at 32 prompts and two seeds.
+
+\subsection{Slot growth and the serving scenarios}
+\label{app:serving}
+
+The slot rate of Section~\ref{sec:serving-kind} varies between sessions: after 16,384 tokens it
+ranges from 1.19 to 4.06 slots per token across the 704 held-out trajectories, and after 131,072
+tokens from 0.55 to 2.02 across the 134 trajectories of that length. One held-out trajectory
+reaches 262,144 tokens; at positions between 128k and 256k, a new token adds 0.55 slots on average
+over the trajectories that reach them. Long cues account for most of the slots: after 16,384
+tokens, cue length 32 has written 0.82 slots per token and cue length 1 has written 0.10. Our decoder stores the
+hash index on the host and the slot vectors on the accelerator, and all three of our model sizes
+use slot width 64. Our implementation also has a bounded store, in which a cue hashes to a set of
+four slots and a new cue evicts the least recently used slot of its set; a device with a fixed
+memory budget requires such a store, and we plan to evaluate it on this recipe.
+
+In the scenario of Table~\ref{tab:serving}a, each attention layer requires 2.1~KB per token and
+\ingram{} 1.6~KB per token in total; the added context comes from the attention caches that are
+removed. At the bound of six slots per token, the largest contexts on the laptop are 559k tokens
+with six attention layers and 719k with four. Decode speed is unchanged in the roofline model (142
+to 146 tokens per second at 262,144 tokens of context on the laptop), because sparse attention
+reads a bounded number of tokens per step. In a decode benchmark of an earlier configuration,
+\ingram{} added 1.3 to 1.4~ms per token to GDN, and neither model slowed down between 4,096 and 1M
+tokens of context (Appendix~\ref{app:decode}).
+

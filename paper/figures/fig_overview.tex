@@ -1,0 +1,88 @@
+\begin{tikzpicture}[
+  font=\footnotesize,
+  >={Stealth[length=1.6mm]},
+  blk/.style={draw=ink!55, line width=0.3pt, minimum width=1.6cm, minimum height=0.33cm, inner sep=0pt,
+              font=\scriptsize},
+  gdn/.style={blk, fill=ramp1!22},
+  att/.style={blk, fill=cat2!55},
+  ing/.style={blk, fill=cat3!55, minimum height=0.26cm},
+  tok/.style={draw=ink!55, line width=0.3pt, minimum width=0.98cm, minimum height=0.46cm, inner sep=1pt,
+              font=\ttfamily\scriptsize, text height=1.25ex, text depth=0.45ex},
+  hid/.style={circle, draw=ink!60, line width=0.3pt, fill=ramp1!22, minimum size=0.3cm, inner sep=0pt},
+  box/.style={draw=ink!60, line width=0.4pt, rounded corners=1.5pt, inner sep=3pt, align=center},
+  lab/.style={font=\scriptsize, align=center, text=ink},
+]
+
+\def\dy{0.385}
+\foreach \i in {1,...,8} {
+  \pgfmathparse{(\i==4 || \i==8) ? 1 : 0}
+  \ifnum\pgfmathresult=1
+    \node[att] (a\i) at (0, \i*\dy) {attention};
+  \else
+    \node[gdn] (a\i) at (0, \i*\dy) {GDN};
+  \fi
+}
+\node[lab] at (0, 3.95) {\textbf{3:1 hybrid}};
+\node[lab, below=2pt of a1] {67.5~MB};
+
+\foreach \i in {1,...,8} {
+  \pgfmathsetmacro\yy{\i*\dy + (\i>1 ? 0.33 : 0)}
+  \node[gdn] (b\i) at (1.85, \yy) {GDN};
+}
+\node[ing] (bing) at (1.85, 1*\dy + 0.36) {\ingram{}};
+\node[lab] at (1.85, 3.95) {\textbf{GDN}\\[-1pt]\textbf{+ \ingram{}}};
+\node[lab, below=2pt of b1] {12.7~MB};
+
+\foreach \i in {1,...,8} {
+  \pgfmathsetmacro\yy{\i*\dy + (\i>1 ? 0.33 : 0)}
+  \ifnum\i=4
+    \node[att] (c\i) at (3.7, \yy) {attention};
+  \else
+    \node[gdn] (c\i) at (3.7, \yy) {GDN};
+  \fi
+}
+\node[ing] (cing) at (3.7, 1*\dy + 0.36) {\ingram{}};
+\node[lab] at (3.7, 3.95) {\textbf{7:1 hybrid}\\[-1pt]\textbf{+ \ingram{}}};
+\node[lab, below=2pt of c1] {46.2~MB};
+
+\node[lab, text=mute] at (1.85, -0.6) {state per session at 16,384 tokens};
+\node[lab] at (1.85, 4.75) {(a) Models compared};
+
+\begin{scope}[xshift=6.75cm]
+\node[tok, draw=none] (t0) at (0.0, 0) {$\cdots$};
+\node[tok, fill=cat3!18] (t1) at (0.95, 0) {tmp};
+\node[tok, fill=cat3!18] (t2) at (2.0, 0) {\_};
+\node[tok] (t3) at (3.05, 0) {folder};
+\node[tok, draw=none] (t4) at (4.0, 0) {$\cdots$};
+\node[tok, fill=cat3!18] (t5) at (4.95, 0) {tmp};
+\node[tok, fill=cat3!18] (t6) at (6.0, 0) {\_};
+\node[tok, densely dashed] (t7) at (7.05, 0) {folder};
+
+\foreach \j in {1,2,3,5,6} { \node[hid] (h\j) at (t\j |- 0, 0.8) {}; \draw[ink!45, line width=0.3pt] (t\j) -- (h\j); }
+\node[lab, text=mute, anchor=east, align=right] at (0.6, 0.95) {hidden state\\[-1pt]after block 1};
+
+\draw[decorate, decoration={brace, mirror, amplitude=3pt}, ink!70] (t1.south west) ++(0,-0.06) -- ($(t2.south east)+(0,-0.06)$)
+  node[midway, below=4pt, lab] {cue $c$, $N = 2$};
+\draw[decorate, decoration={brace, mirror, amplitude=3pt}, ink!70] (t5.south west) ++(0,-0.06) -- ($(t6.south east)+(0,-0.06)$)
+  node[midway, below=4pt, lab] {same cue $c$};
+\node[lab, below=7pt of t7] {predicted};
+
+\node[box, fill=cat3!14, minimum width=2.5cm] (slot) at (3.05, 2.9)
+  {slot $S_c$ of this session\\[-1pt]{\scriptsize address: hash of $c$}};
+\node[circle, draw=ink!70, inner sep=0.6pt, font=\scriptsize] (plus) at (6.0, 1.95) {$+$};
+\node[box, fill=ink!6] (table) at (7.55, 1.95)
+  {table row $R_c$\\[-1pt]{\scriptsize parameters}};
+
+\draw[->, cat3!70!black, line width=0.7pt] (h3) -- (slot.south)
+  node[pos=0.52, left=2pt, lab, text=cat3!50!black] {write\\$S_c \leftarrow S_c + \beta\,(v - S_c)$};
+\draw[->, cat1!85!black, line width=0.7pt] (slot.east) -| (plus.north);
+\draw[->, ink!70, line width=0.5pt] (table.west) -- (plus.east);
+\draw[->, cat1!85!black, line width=0.7pt] (plus) -- (h6)
+  node[pos=0.45, left=2pt, lab, text=cat1!70!black] {read};
+\node[lab, anchor=west] at (6.2, 1.2) {$x \leftarrow x + \alpha\, W_O\,(R_c + S_c)$};
+\draw[->, ink!55, line width=0.4pt, densely dashed] (h6.east) to[out=0, in=90] (t7.north);
+
+\node[lab, text=mute] at (3.5, -1.15) {the same write and read run for each cue length $N \in \{1, 2, 4, 8, 16, 32\}$};
+\node[lab] at (3.5, 4.75) {(b) One write and one read of \ingram{}};
+\end{scope}
+\end{tikzpicture}

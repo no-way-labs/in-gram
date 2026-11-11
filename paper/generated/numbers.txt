@@ -1,0 +1,235 @@
+== Repeat statistics by position in the session (held-out trajectories from their first token) ==
+held-out trajectories 704, tokens 69.8M, median length 95978, max 263992, at least 64k: 80.4%, at least 128k: 19.0%
+0k-1k (704 trajectories): seen N=8 0.074, N=32 0.010; lookup 8..1 0.285; older value 0.008; far exact (N=8, > 512 back) 0.003; longest cue is 32: 0.010; new slots 4.60 | trajectories >= 128k only: seen N=8 0.092, lookup 0.302
+1k-2k (704 trajectories): seen N=8 0.169, N=32 0.020; lookup 8..1 0.413; older value 0.009; far exact (N=8, > 512 back) 0.021; longest cue is 32: 0.020; new slots 4.11 | trajectories >= 128k only: seen N=8 0.178, lookup 0.415
+2k-4k (704 trajectories): seen N=8 0.408, N=32 0.074; lookup 8..1 0.652; older value 0.016; far exact (N=8, > 512 back) 0.044; longest cue is 32: 0.074; new slots 3.11 | trajectories >= 128k only: seen N=8 0.425, lookup 0.663
+4k-8k (704 trajectories): seen N=8 0.335, N=32 0.107; lookup 8..1 0.594; older value 0.030; far exact (N=8, > 512 back) 0.053; longest cue is 32: 0.107; new slots 3.26 | trajectories >= 128k only: seen N=8 0.354, lookup 0.603
+8k-16k (704 trajectories): seen N=8 0.532, N=32 0.291; lookup 8..1 0.735; older value 0.053; far exact (N=8, > 512 back) 0.096; longest cue is 32: 0.291; new slots 2.29 | trajectories >= 128k only: seen N=8 0.561, lookup 0.747
+16k-32k (704 trajectories): seen N=8 0.614, N=32 0.348; lookup 8..1 0.775; older value 0.069; far exact (N=8, > 512 back) 0.174; longest cue is 32: 0.348; new slots 1.95 | trajectories >= 128k only: seen N=8 0.674, lookup 0.815
+32k-64k (699 trajectories): seen N=8 0.706, N=32 0.450; lookup 8..1 0.813; older value 0.079; far exact (N=8, > 512 back) 0.252; longest cue is 32: 0.450; new slots 1.54 | trajectories >= 128k only: seen N=8 0.653, lookup 0.787
+64k-128k (566 trajectories): seen N=8 0.860, N=32 0.705; lookup 8..1 0.898; older value 0.055; far exact (N=8, > 512 back) 0.211; longest cue is 32: 0.705; new slots 0.78 | trajectories >= 128k only: seen N=8 0.884, lookup 0.908
+128k-256k (134 trajectories): seen N=8 0.902, N=32 0.784; lookup 8..1 0.916; older value 0.056; far exact (N=8, > 512 back) 0.218; longest cue is 32: 0.784; new slots 0.55 | trajectories >= 128k only: seen N=8 0.902, lookup 0.916
+
+== Confirmatory tests (one-sided Wilcoxon, Holm within each pre-registered family) ==
+P29 D1 long cues - cues 1-5: -0.0248 [-0.0283, -0.0221], median -0.0226, 8/8 negative, p = 0.0039, Holm 0.0117; arm means 0.6073 vs 0.6320
+P29 D2 WP - 30M hybrid: -0.1420 [-0.1664, -0.1265], median -0.1339, 8/8 negative, p = 0.0039, Holm 0.0117; arm means 0.6073 vs 0.7493
+P29 D2c same, both + cache: -0.0463 [-0.0537, -0.0417], median -0.0432, 8/8 negative, p = 0.0039, Holm 0.0117; arm means 0.5804 vs 0.6267
+P30 D3 WP - 54M hybrid: -0.1018 [-0.1131, -0.0925], median -0.1013, 8/8 negative, p = 0.0039, Holm 0.0078; arm means 0.6073 vs 0.7091
+P30 D3c same, both + cache: -0.0225 [-0.0275, -0.0176], median -0.0214, 8/8 negative, p = 0.0039, Holm 0.0078; arm means 0.5804 vs 0.6029
+P31 T1 20k WP - 20k hybrid: -0.0725 [-0.0854, -0.0605], median -0.0732, 8/8 negative, p = 0.0039, Holm 0.0156; arm means 0.5498 vs 0.6223
+P31 T2 10k WP - 20k hybrid: -0.0151 [-0.0279, -0.0029], median -0.0179, 6/8 negative, p = 0.0391, Holm 0.0391; arm means 0.6073 vs 0.6223
+P31 T3 WP - static-table hybrid: -0.1373 [-0.1787, -0.1041], median -0.1303, 8/8 negative, p = 0.0039, Holm 0.0156; arm means 0.6073 vs 0.7446
+P31 T4 size 2: -0.1270 [-0.1375, -0.1183], median -0.1233, 8/8 negative, p = 0.0039, Holm 0.0156; arm means 0.5821 vs 0.7091
+P32 T1 7:1+WP - 3:1: -0.0627 [-0.0715, -0.0541], median -0.0624, 8/8 negative, p = 0.0039, Holm 0.0078; arm means 0.4476 vs 0.5103
+P32 T2 7:1+WP - 7:1: -0.0603 [-0.0673, -0.0545], median -0.0598, 8/8 negative, p = 0.0039, Holm 0.0078; arm means 0.4476 vs 0.5079
+-- reported, not tested --
+D1 + cache: -0.0137 [-0.0164, -0.0116], median -0.0127, 8/8 negative, p = 0.0039; arm means 0.5804 vs 0.5942
+T1 + cache: -0.0242 [-0.0312, -0.0178], median -0.0230, 8/8 negative, p = 0.0039; arm means 0.5302 vs 0.5544
+T2 + cache: +0.0260 [+0.0197, +0.0321], median +0.0264, 0/8 negative, p = 1.0000; arm means 0.5804 vs 0.5544
+T3 + cache: -0.0423 [-0.0557, -0.0298], median -0.0397, 8/8 negative, p = 0.0039; arm means 0.5804 vs 0.6227
+T4 + cache: -0.0442 [-0.0488, -0.0399], median -0.0436, 8/8 negative, p = 0.0039; arm means 0.5587 vs 0.6029
+T5 size 3 (n = 4): -0.0576 [-0.0796, -0.0400], median -0.0531, 4/4 negative, p = 0.0625; arm means 0.5033 vs 0.5609
+T5 + cache: -0.0211 [-0.0328, -0.0124], median -0.0181, 4/4 negative, p = 0.0625; arm means 0.4879 vs 0.5090
+P32 T1 + cache: -0.0363 [-0.0420, -0.0310], median -0.0355, 8/8 negative, p = 0.0039; arm means 0.4375 vs 0.4738
+P32 T2 + cache: -0.0344 [-0.0387, -0.0305], median -0.0339, 8/8 negative, p = 0.0039; arm means 0.4375 vs 0.4718
+D2 without seed 20: -0.1306; D2 median -0.1339
+parameters: WP 55969094, WP cues 1-5 51724869, H30 30369456, H54 54206124, static 55835318, WP size 2 80274966, WP size 3 115251974, H size 3 88410560, 7:1+WP 55902206, 7:1 30436344
+
+== Phase 32, exploratory ==
+3:1 - 7:1 at 80k: +0.0024 [-0.0109, +0.0142], 3/8 negative, two-sided Wilcoxon p = 0.547
+seed sd at 80k: 7:1+WP 0.0023, 3:1 0.0133, 7:1 0.0103
+step 8000: 7:1+WP 0.708, 3:1 0.988, 7:1 1.063; L7-H3 -0.280, L7-H7 -0.355, H3-H7 -0.075 (sd over seeds: 0.019 / 0.025 / 0.130)
+step 16000: 7:1+WP 0.641, 3:1 0.853, 7:1 0.872; L7-H3 -0.212, L7-H7 -0.231, H3-H7 -0.019 (sd over seeds: 0.017 / 0.020 / 0.074)
+step 24000: 7:1+WP 0.605, 3:1 0.800, 7:1 0.827; L7-H3 -0.195, L7-H7 -0.222, H3-H7 -0.028 (sd over seeds: 0.014 / 0.017 / 0.045)
+step 32000: 7:1+WP 0.575, 3:1 0.756, 7:1 0.767; L7-H3 -0.182, L7-H7 -0.193, H3-H7 -0.011 (sd over seeds: 0.017 / 0.028 / 0.054)
+step 40000: 7:1+WP 0.543, 3:1 0.693, 7:1 0.702; L7-H3 -0.150, L7-H7 -0.159, H3-H7 -0.009 (sd over seeds: 0.006 / 0.021 / 0.049)
+step 48000: 7:1+WP 0.518, 3:1 0.646, 7:1 0.656; L7-H3 -0.128, L7-H7 -0.138, H3-H7 -0.010 (sd over seeds: 0.006 / 0.011 / 0.044)
+step 56000: 7:1+WP 0.492, 3:1 0.599, 7:1 0.598; L7-H3 -0.106, L7-H7 -0.106, H3-H7 +0.000 (sd over seeds: 0.004 / 0.013 / 0.016)
+step 64000: 7:1+WP 0.469, 3:1 0.553, 7:1 0.550; L7-H3 -0.084, L7-H7 -0.081, H3-H7 +0.003 (sd over seeds: 0.003 / 0.013 / 0.010)
+step 72000: 7:1+WP 0.453, 3:1 0.522, 7:1 0.520; L7-H3 -0.069, L7-H7 -0.066, H3-H7 +0.002 (sd over seeds: 0.003 / 0.013 / 0.010)
+step 80000: 7:1+WP 0.448, 3:1 0.510, 7:1 0.508; L7-H3 -0.063, L7-H7 -0.060, H3-H7 +0.002 (sd over seeds: 0.002 / 0.013 / 0.010)
+
+== Gap by step within runs ==
+20k runs, step 2000: -0.8690 (median -0.8963)
+20k runs, step 4000: -0.4677 (median -0.4747)
+20k runs, step 6000: -0.2975 (median -0.3055)
+20k runs, step 8000: -0.2301 (median -0.2358)
+20k runs, step 10000: -0.1938 (median -0.1956)
+20k runs, step 12000: -0.1542 (median -0.1561)
+20k runs, step 14000: -0.1217 (median -0.1213)
+20k runs, step 16000: -0.0958 (median -0.0973)
+20k runs, step 18000: -0.0782 (median -0.0791)
+20k runs, step 20000: -0.0725 (median -0.0732)
+10k runs, step 2000: -0.8677
+10k runs, step 4000: -0.4373
+10k runs, step 6000: -0.2604
+10k runs, step 8000: -0.1674
+10k runs, step 10000: -0.1420
+WP at 20k - WP at 10k: -0.0574 [-0.0598, -0.0553]
+3:1 at 20k - 3:1 at 10k: -0.1270 [-0.1597, -0.1007]
+
+== Dose grid (seeds 0-1) ==
+A=0: P=0 1.0018 (1.0175/0.9861)  P=1 0.6086 (0.6109/0.6064)  P=2 0.5904 (0.5914/0.5894)  P=4 0.5840 (0.5850/0.5830)
+A=1: P=0 0.9953 (0.9965/0.9940)  P=1 0.6068 (0.6068/0.6068)  P=2 0.5854 (0.5901/0.5808)  P=4 0.5821 (0.5806/0.5836)
+A=2: P=0 0.7218 (0.7141/0.7295)  P=1 0.5939 (0.5974/0.5903)  P=2 0.5874 (0.5883/0.5865)  P=4 0.5829 (0.5846/0.5812)
+A=4: P=0 0.7418 (0.7568/0.7268)  P=1 0.6018 (0.6054/0.5982)  P=2 0.5837 (0.5832/0.5842)  P=4 0.5751 (0.5771/0.5732)
+A1 P=1: every A below L_ref 0.7218: True; margin L_ref - L(A=0,P) +0.1132; A=0 below ref on both seeds: True
+A1 P=2: every A below L_ref 0.7218: True; margin L_ref - L(A=0,P) +0.1314; A=0 below ref on both seeds: True
+A1 P=4: every A below L_ref 0.7218: True; margin L_ref - L(A=0,P) +0.1378; A=0 below ref on both seeds: True
+grid, cache-mixed (seed mean): GDN 0.6831, 3:1 0.6206, GDN+WP P=1 0.5813
+
+== A3: cost of removing attention, C = NLL(A=0,P) - NLL(A=2,P), window bootstrap ==
+all (100.0%): P=0 +0.280 [+0.215, +0.344]  P=1 +0.015 [+0.010, +0.020]  P=2 +0.003 [+0.001, +0.005]  P=4 +0.001 [-0.001, +0.003]
+exact_far (16.4%): P=0 +0.646 [+0.527, +0.773]  P=1 +0.000 [-0.003, +0.003]  P=2 -0.003 [-0.006, +0.000]  P=4 -0.001 [-0.002, +0.001]
+exact_near (45.2%): P=0 +0.169 [+0.105, +0.255]  P=1 +0.001 [-0.001, +0.002]  P=2 -0.001 [-0.002, +0.001]  P=4 -0.001 [-0.004, +0.000]
+consistent (12.1%): P=0 +0.465 [+0.412, +0.521]  P=1 +0.002 [-0.002, +0.005]  P=2 -0.001 [-0.004, +0.002]  P=4 -0.001 [-0.004, +0.001]
+latest_value (2.3%): P=0 +0.262 [+0.191, +0.349]  P=1 +0.006 [-0.006, +0.018]  P=2 -0.004 [-0.011, +0.003]  P=4 -0.005 [-0.015, +0.005]
+older_value (2.1%): P=0 +0.261 [+0.209, +0.314]  P=1 +0.053 [+0.036, +0.073]  P=2 +0.012 [-0.004, +0.025]  P=4 +0.016 [+0.003, +0.029]
+novel (5.4%): P=0 +0.016 [-0.001, +0.032]  P=1 -0.009 [-0.021, +0.003]  P=2 +0.008 [-0.001, +0.019]  P=4 -0.007 [-0.017, +0.002]
+no_match (5.4%): P=0 +0.048 [+0.035, +0.061]  P=1 +0.053 [+0.026, +0.099]  P=2 +0.019 [+0.004, +0.040]  P=4 +0.013 [+0.005, +0.021]
+fuzzy_far (3.7%): P=0 +0.261 [+0.193, +0.335]  P=1 +0.011 [+0.003, +0.020]  P=2 +0.001 [-0.007, +0.009]  P=4 +0.003 [-0.001, +0.008]
+bracket_far (0.1%): P=0 +0.628 [+0.327, +0.963]  P=1 +0.074 [-0.088, +0.273]  P=2 -0.034 [-0.123, +0.055]  P=4 +0.117 [-0.048, +0.288]
+count_next (1.0%): P=0 +0.048 [+0.012, +0.091]  P=1 +0.004 [-0.007, +0.016]  P=2 -0.002 [-0.013, +0.008]  P=4 -0.008 [-0.014, -0.002]
+format (4.7%): P=0 +0.055 [+0.041, +0.070]  P=1 +0.041 [+0.013, +0.102]  P=2 +0.012 [+0.000, +0.036]  P=4 +0.005 [-0.002, +0.013]
+
+== A4: induction share of far attention ==
+A=2 P=0: share 0.235 / 0.231, mean 0.233; far mass 0.588
+A=2 P=1: share 0.135 / 0.136, mean 0.136; far mass 0.483
+A=2 P=2: share 0.157 / 0.206, mean 0.181; far mass 0.471
+A=2 P=4: share 0.238 / 0.110, mean 0.174; far mass 0.530
+A=4 P=0: share 0.245 / 0.178, mean 0.211; far mass 0.500
+A=4 P=1: share 0.104 / 0.205, mean 0.154; far mass 0.445
+A=4 P=2: share 0.160 / 0.139, mean 0.150; far mass 0.392
+A=4 P=4: share 0.072 / 0.146, mean 0.109; far mass 0.420
+
+== Gap by token type (ours - 3:1 hybrid), window bootstrap; contribution = share of the total gap ==
+all (100.0%): 164M: ref 0.749 ours 0.607 gap -0.142 [-0.187, -0.102] contrib -0.1420 | 328M: ref 0.622 ours 0.550 gap -0.072 [-0.102, -0.046] contrib -0.0725 | 1.31B: ref 0.510 ours 0.448 gap -0.063 [-0.084, -0.044] contrib -0.0627
+exact_far (16.4%): 164M: ref 0.620 ours 0.105 gap -0.515 [-0.642, -0.401] contrib -0.0845 | 328M: ref 0.423 ours 0.086 gap -0.337 [-0.429, -0.252] contrib -0.0553 | 1.31B: ref 0.283 ours 0.067 gap -0.216 [-0.290, -0.152] contrib -0.0355
+exact_near (45.2%): 164M: ref 0.082 ours 0.037 gap -0.045 [-0.070, -0.027] contrib -0.0204 | 328M: ref 0.047 ours 0.030 gap -0.016 [-0.026, -0.009] contrib -0.0075 | 1.31B: ref 0.032 ours 0.023 gap -0.009 [-0.014, -0.005] contrib -0.0039
+consistent (12.1%): 164M: ref 0.360 ours 0.158 gap -0.202 [-0.261, -0.156] contrib -0.0245 | 328M: ref 0.250 ours 0.139 gap -0.111 [-0.151, -0.078] contrib -0.0134 | 1.31B: ref 0.180 ours 0.115 gap -0.064 [-0.090, -0.044] contrib -0.0078
+latest_value (2.3%): 164M: ref 0.458 ours 0.355 gap -0.104 [-0.133, -0.075] contrib -0.0024 | 328M: ref 0.353 ours 0.317 gap -0.037 [-0.059, -0.017] contrib -0.0008 | 1.31B: ref 0.279 ours 0.240 gap -0.038 [-0.049, -0.027] contrib -0.0009
+older_value (2.1%): 164M: ref 0.973 ours 0.991 gap +0.018 [-0.026, +0.060] contrib +0.0004 | 328M: ref 0.806 ours 0.895 gap +0.089 [+0.042, +0.138] contrib +0.0019 | 1.31B: ref 0.638 ours 0.625 gap -0.013 [-0.027, +0.000] contrib -0.0003
+novel (5.4%): 164M: ref 3.687 ours 3.471 gap -0.216 [-0.283, -0.173] contrib -0.0116 | 328M: ref 3.423 ours 3.260 gap -0.163 [-0.239, -0.117] contrib -0.0088 | 1.31B: ref 3.088 ours 2.976 gap -0.112 [-0.155, -0.079] contrib -0.0060
+no_match (5.4%): 164M: ref 2.081 ours 1.971 gap -0.110 [-0.166, -0.073] contrib -0.0059 | 328M: ref 1.865 ours 1.801 gap -0.063 [-0.117, -0.029] contrib -0.0034 | 1.31B: ref 1.613 ours 1.550 gap -0.063 [-0.088, -0.043] contrib -0.0034
+fuzzy_far (3.7%): 164M: ref 0.515 ours 0.398 gap -0.117 [-0.196, -0.060] contrib -0.0043 | 328M: ref 0.400 ours 0.360 gap -0.040 [-0.082, -0.007] contrib -0.0015 | 1.31B: ref 0.313 ours 0.262 gap -0.051 [-0.088, -0.023] contrib -0.0019
+bracket_far (0.1%): 164M: ref 1.628 ours 1.429 gap -0.199 [-0.448, -0.001] contrib -0.0002 | 328M: ref 1.257 ours 1.140 gap -0.116 [-0.302, +0.029] contrib -0.0001 | 1.31B: ref 0.954 ours 0.776 gap -0.178 [-0.295, -0.095] contrib -0.0001
+count_next (1.0%): 164M: ref 0.356 ours 0.262 gap -0.094 [-0.188, -0.028] contrib -0.0009 | 328M: ref 0.288 ours 0.231 gap -0.057 [-0.112, -0.018] contrib -0.0006 | 1.31B: ref 0.210 ours 0.155 gap -0.055 [-0.126, -0.010] contrib -0.0005
+format (4.7%): 164M: ref 0.139 ours 0.155 gap +0.016 [+0.004, +0.038] contrib +0.0008 | 328M: ref 0.111 ours 0.123 gap +0.012 [+0.005, +0.020] contrib +0.0006 | 1.31B: ref 0.086 ours 0.079 gap -0.007 [-0.013, -0.004] contrib -0.0003
+
+== Cost (per run group; wall seconds per training step incl. data loading and evals) ==
+conf6-a2p0: params 30369456, s/step mean 0.1168 median 0.1218 [0.101, 0.125], peak mem 4.3 GB, state 67.50 MB, mean slots 4464.75
+conf29-o12481632: params 55969094, s/step mean 0.1394 median 0.1297 [0.116, 0.198], peak mem 5.8 GB, state 8.03 MB, mean slots 29336.71875
+b31-static: params 55835318, s/step mean 0.1363 median 0.1380 [0.123, 0.148], peak mem 5.7 GB, state 75.01 MB, mean slots 29336.71875
+conf30-hyb54: params 54206124, s/step mean 0.1593 median 0.1561 [0.150, 0.175], peak mem 6.6 GB, state 151.88 MB, mean slots 4464.75
+b31-size2: params 80274966, s/step mean 0.1696 median 0.1673 [0.161, 0.185], peak mem 8.2 GB, state 8.69 MB, mean slots 29336.71875
+p32-a2p0: params 30369456, s/step mean 0.1212 median 0.1219 [0.099, 0.135], peak mem 4.3 GB, state 67.50 MB, mean slots 4464.75
+p32-a1p0: params 30436344, s/step mean 0.1159 median 0.1218 [0.093, 0.127], peak mem 4.4 GB, state 34.01 MB, mean slots 4464.75
+p32-a1p1: params 55902206, s/step mean 0.1321 median 0.1313 [0.118, 0.160], peak mem 5.8 GB, state 41.52 MB, mean slots 29336.71875
+
+== State against context (fp32; attention 2048 B per token per layer) ==
+GDN block state 0.0655 MB; check with the evaluation windows' slot count at 16k: GDN+In-gram 8.03 MB (logged 8.03), 7:1+In-gram 41.52 MB (logged 41.52); evaluation windows 1.791 slots per token, ratio to one attention layer 4.47
+from session start, context 1024: 704 trajectories, 4.589 slots per token (median 4.77, 2.21 to 5.02); one attention layer / slots = 1.74; per cue 1: 0.334, 2: 0.618, 4: 0.811, 8: 0.918, 16: 0.950, 32: 0.958
+from session start, context 2048: 704 trajectories, 4.347 slots per token (median 4.47, 2.20 to 4.83); one attention layer / slots = 1.84; per cue 1: 0.266, 2: 0.544, 4: 0.753, 8: 0.874, 16: 0.941, 32: 0.969
+from session start, context 4096: 704 trajectories, 3.731 slots per token (median 3.73, 1.77 to 4.44); one attention layer / slots = 2.14; per cue 1: 0.189, 2: 0.408, 4: 0.591, 8: 0.733, 16: 0.862, 32: 0.947
+from session start, context 8192: 704 trajectories, 3.495 slots per token (median 3.60, 1.16 to 4.31); one attention layer / slots = 2.29; per cue 1: 0.151, 2: 0.355, 4: 0.542, 8: 0.699, 16: 0.827, 32: 0.920
+from session start, context 16384: 704 trajectories, 2.895 slots per token (median 3.14, 1.19 to 4.06); one attention layer / slots = 2.76; per cue 1: 0.099, 2: 0.257, 4: 0.420, 8: 0.584, 16: 0.719, 32: 0.815
+from session start, context 32768: 699 trajectories, 2.421 slots per token (median 2.70, 0.75 to 3.98); one attention layer / slots = 3.30; per cue 1: 0.063, 2: 0.184, 4: 0.324, 8: 0.485, 16: 0.632, 32: 0.733
+from session start, context 65536: 566 trajectories, 1.955 slots per token (median 1.96, 0.64 to 3.90); one attention layer / slots = 4.09; per cue 1: 0.039, 2: 0.129, 4: 0.243, 8: 0.384, 16: 0.528, 32: 0.632
+from session start, context 131072: 134 trajectories, 1.342 slots per token (median 1.32, 0.55 to 2.02); one attention layer / slots = 5.96; per cue 1: 0.022, 2: 0.079, 4: 0.155, 8: 0.256, 16: 0.369, 32: 0.460
+new slots per token between 1024 and 2048: 4.105 (704 trajectories)
+new slots per token between 2048 and 4096: 3.114 (704 trajectories)
+new slots per token between 4096 and 8192: 3.258 (704 trajectories)
+new slots per token between 8192 and 16384: 2.295 (704 trajectories)
+new slots per token between 16384 and 32768: 1.950 (699 trajectories)
+new slots per token between 32768 and 65536: 1.549 (566 trajectories)
+new slots per token between 65536 and 131072: 0.665 (134 trajectories)
+context 1024: 3:1 4.6 MB, 7:1+In-gram 3.8 MB, GDN+In-gram 1.7 MB; slots per token 4.589; ratios 1.22, 2.7
+context 2048: 3:1 8.8 MB, 7:1+In-gram 6.9 MB, GDN+In-gram 2.8 MB; slots per token 4.347; ratios 1.27, 3.1
+context 4096: 3:1 17.2 MB, 7:1+In-gram 12.8 MB, GDN+In-gram 4.4 MB; slots per token 3.731; ratios 1.35, 3.9
+context 8192: 3:1 33.9 MB, 7:1+In-gram 24.6 MB, GDN+In-gram 7.9 MB; slots per token 3.495; ratios 1.38, 4.3
+context 16384: 3:1 67.5 MB, 7:1+In-gram 46.2 MB, GDN+In-gram 12.7 MB; slots per token 2.895; ratios 1.46, 5.3
+context 32768: 3:1 134.6 MB, 7:1+In-gram 87.9 MB, GDN+In-gram 20.8 MB; slots per token 2.421; ratios 1.53, 6.5
+context 65536: 3:1 268.8 MB, 7:1+In-gram 167.5 MB, GDN+In-gram 33.3 MB; slots per token 1.955; ratios 1.61, 8.1
+context 131072: 3:1 537.3 MB, 7:1+In-gram 313.9 MB, GDN+In-gram 45.5 MB; slots per token 1.342; ratios 1.71, 11.8
+step-time ratio WP / 3:1 (10k runs): means 1.193, medians 1.066
+
+== Cue sets (dev seeds 0-1, GDN + In-gram, P = 1 unless stated) ==
+sd14-a0p1: 0.6349 / 0.6316, mean 0.6333; + cache 0.5952; params 51724869
+cue28-o123458: 0.6237 / 0.6217, mean 0.6227; + cache 0.5922; params 55969094
+cue28-o12358: 0.6243 / 0.6244, mean 0.6243; + cache 0.5928; params 51724869
+cue28-o124816: 0.6161 / 0.6124, mean 0.6142; + cache 0.5860; params 51724869
+cue28-o1235816: 0.6111 / 0.6112, mean 0.6111; + cache 0.5831; params 55969094
+cue29-o12481632: 0.6102 / 0.6020, mean 0.6061; + cache 0.5790; params 55969094
+P = 2, sd14-a0p2: 0.6102 / 0.6064, mean 0.6083
+P = 2, cue29-p2-o1235816: 0.5914 / 0.5928, mean 0.5921
+
+== Read rule (conf7: 4 blocks, d256, 4k context, cues 1-5, seeds 13-20) ==
+ctxkey-k4 - additive: -0.0054 [-0.0079, -0.0029], median -0.0061, 8/8 negative, p = 0.0039; means 0.8239 vs 0.8293
+ctxkey-k8 - additive: -0.0118 [-0.0150, -0.0085], median -0.0106, 8/8 negative, p = 0.0039; means 0.8175 vs 0.8293
+scored read K = 8 with long cues, 16k, dev seeds: 0.6288 / 0.6078, mean 0.6183 (additive: 0.6061)
+
+== Learning-rate checks (dev seeds) ==
+GDN, $8\times256$ lr 4e-3: 1.0175 / 0.9861 (mean of available 1.0018)  <- lowest
+GDN, $8\times256$ lr 8e-3: 1.1702 / 1.0317 (mean of available 1.1009)
+3:1 hybrid, $8\times256$ lr 2e-3: 0.7329 / 0.7175 (mean of available 0.7252)
+3:1 hybrid, $8\times256$ lr 4e-3: 0.7141 / 0.7295 (mean of available 0.7218)  <- lowest
+1:1 hybrid, $8\times256$ lr 2e-3: 0.7439 / 0.7202 (mean of available 0.7321)  <- lowest
+1:1 hybrid, $8\times256$ lr 4e-3: 0.7568 / 0.7268 (mean of available 0.7418)
+Attention only, $8\times256$ lr 2e-3: 0.7905 / 0.7408 (mean of available 0.7657)  <- lowest
+Attention only, $8\times256$ lr 4e-3: 0.8148 / 0.7847 (mean of available 0.7997)
+GDN + \ingram{}, $8\times256$ lr 1e-3: 0.6239 / 0.6218 (mean of available 0.6228)
+GDN + \ingram{}, $8\times256$ lr 2e-3: 0.6102 / 0.6020 (mean of available 0.6061)  <- lowest
+GDN + \ingram{}, $8\times256$ lr 4e-3: n/a / 0.6106 (mean of available 0.6106)
+3:1 hybrid + static table, $8\times256$ lr 2e-3: 0.7293 / 0.7554 (mean of available 0.7423)
+3:1 hybrid + static table, $8\times256$ lr 4e-3: 0.7425 / 0.7333 (mean of available 0.7379)  <- lowest
+3:1 hybrid, $12\times384$ lr 2e-3: 0.6772 / 0.7481 (mean of available 0.7126)  <- lowest
+3:1 hybrid, $12\times384$ lr 4e-3: 0.7139 / 0.7767 (mean of available 0.7453)
+GDN + \ingram{} (cues 1--5), $12\times384$ lr 1e-3: 0.6127 / 0.6175 (mean of available 0.6151)
+GDN + \ingram{} (cues 1--5), $12\times384$ lr 2e-3: 0.6078 / 0.6093 (mean of available 0.6085)  <- lowest
+3:1 hybrid, $16\times512$ lr 1e-3: 0.5692 / n/a (mean of available 0.5692)
+3:1 hybrid, $16\times512$ lr 2e-3: 0.5540 / n/a (mean of available 0.5540)  <- lowest
+GDN + \ingram{}, $16\times512$ lr 1e-3: 0.5038 / n/a (mean of available 0.5038)
+GDN + \ingram{}, $16\times512$ lr 2e-3: 0.5017 / n/a (mean of available 0.5017)  <- lowest
+
+== Arm means with the cache (seeds 20-27) ==
+conf6-a0p1: 0.6320 -> 0.5942
+conf29-o12481632: 0.6073 -> 0.5804
+conf6-a2p0: 0.7493 -> 0.6267
+conf30-hyb54: 0.7091 -> 0.6029
+b31-static: 0.7446 -> 0.6227
+b31-size2: 0.5821 -> 0.5587
+b31-longloc: 0.5498 -> 0.5302
+b31-longhyb: 0.6223 -> 0.5544
+p32-a1p1: 0.4476 -> 0.4375
+p32-a2p0: 0.5103 -> 0.4738
+p32-a1p0: 0.5079 -> 0.4718
+
+== Other derived numbers ==
+P27-B cues 1-5 WP - 30M hybrid (single pre-registered test): -0.1173 [-0.1434, -0.0990], median -0.1115, 8/8 negative, p = 0.0039
+static-table hybrid - plain 30M hybrid (not pre-registered): -0.0047 [-0.0418, +0.0393], 4/8 negative, two-sided Wilcoxon p = 0.641
+cache gain: WP cues 1-5 0.0379, WP 0.0268, 30M hybrid 0.1225
+quantization (q28, cues 1-5 checkpoints, change in loss vs bf16; seeds 0 / 1) and generation:
+  sd14-a0p0 w4: +0.0070 / +0.0076
+  sd14-a0p0 kv8: +0.0000 / +0.0000
+  sd14-a0p0 kv4: +0.0000 / +0.0000
+  sd14-a0p0 tbl4: +0.0000 / +0.0000
+  sd14-a0p0 st4: +0.0000 / +0.0000
+  sd14-a0p0 greedy loop 0.562 / 0.625; T=1 loop 0.219 / 0.281; greedy copy8 0.491 / 0.472; reference loop 0.219, copy8 0.624
+  sd14-a2p0 w4: +0.0096 / +0.0095
+  sd14-a2p0 kv8: +0.0011 / +0.0004
+  sd14-a2p0 kv4: +0.3502 / +0.0640
+  sd14-a2p0 tbl4: +0.0000 / +0.0000
+  sd14-a2p0 st4: +0.0000 / +0.0000
+  sd14-a2p0 greedy loop 0.500 / 0.594; T=1 loop 0.219 / 0.219; greedy copy8 0.579 / 0.636; reference loop 0.219, copy8 0.624
+  sd14-a0p1 w4: +0.0025 / +0.0024
+  sd14-a0p1 kv8: +0.0000 / +0.0000
+  sd14-a0p1 kv4: +0.0000 / +0.0000
+  sd14-a0p1 tbl4: +0.0001 / +0.0001
+  sd14-a0p1 st4: +0.0005 / +0.0005
+  sd14-a0p1 greedy loop 0.656 / 0.500; T=1 loop 0.250 / 0.219; greedy copy8 0.695 / 0.700; reference loop 0.219, copy8 0.624
+  sd14-a0p2 w4: +0.0037 / +0.0025
+  sd14-a0p2 kv8: +0.0000 / +0.0000
+  sd14-a0p2 kv4: +0.0000 / +0.0000
+  sd14-a0p2 tbl4: +0.0001 / +0.0001
+  sd14-a0p2 st4: +0.0004 / +0.0005
+  sd14-a0p2 greedy loop 0.500 / 0.531; T=1 loop 0.219 / 0.250; greedy copy8 0.687 / 0.699; reference loop 0.219, copy8 0.624
