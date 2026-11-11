@@ -7,6 +7,7 @@ authors:
     given-names: Keston
     affiliation: No Way Labs
 repository-code: "https://github.com/no-way-labs/in-gram"
+doi: 10.5281/zenodo.24123056
 license: MIT
 date-released: "2026-11-10"
 preferred-citation:
@@ -17,4 +18,5 @@ preferred-citation:
       given-names: Keston
       affiliation: No Way Labs
   year: 2026
+  doi: 10.5281/zenodo.24123056
   url: "https://github.com/no-way-labs/in-gram"

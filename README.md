@@ -1,5 +1,7 @@
 # In-gram: In-Context N-gram Memory
 
+[![DOI](https://zenodo.org/badge/1453395057.svg)](https://doi.org/10.5281/zenodo.24123056)
+
 Paper, reference implementation and full reproduction package for **In-gram**, a memory layer that lets a
 hybrid language model reach lower loss with fewer softmax-attention layers.
 
@@ -134,9 +136,13 @@ or as an issue on this repository.
   author = {Aquino-Michaels, Keston},
   year   = {2026},
   note   = {No Way Labs},
+  doi    = {10.5281/zenodo.24123056},
   url    = {https://github.com/no-way-labs/in-gram}
 }
 ```
+
+The DOI [10.5281/zenodo.24123056](https://doi.org/10.5281/zenodo.24123056) refers to the archived releases of this
+repository on Zenodo and always resolves to the latest one.
 
 ## Licence
 
